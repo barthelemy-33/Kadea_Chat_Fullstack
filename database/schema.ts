@@ -30,6 +30,27 @@ export class ConversationSchema extends BaseModel {
   declare updatedAt: DateTime | null
 }
 
+export class MessageSchema extends BaseModel {
+  static $columns = ['content', 'conversationId', 'createdAt', 'deletedAt', 'id', 'senderId', 'type', 'updatedAt'] as const
+  $columns = MessageSchema.$columns
+  @column()
+  declare content: string | null
+  @column()
+  declare conversationId: number
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column.dateTime()
+  declare deletedAt: DateTime | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare senderId: number
+  @column()
+  declare type: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
 export class UserTokenSchema extends BaseModel {
   static $columns = ['createdAt', 'expiresAt', 'id', 'tokenHash', 'type', 'usedAt', 'userId'] as const
   $columns = UserTokenSchema.$columns
