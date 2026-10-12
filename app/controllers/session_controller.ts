@@ -18,10 +18,16 @@ export default class SessionController {
   /**
    * Authenticate user credentials and create a new session
    */
-  async store({ request, auth, response }: HttpContext) {
+  async store({ request, auth, response, session }: HttpContext) {
     const { email, password } = await request.validateUsing(loginValidator)
     const user = await User.verifyCredentials(email, password)
 
+    // Verification du email
+
+    if (!user.emailVerifiedAt) {
+      session.flash('error', `confirme d'abord l'email`)
+      return response.redirect().back()
+    }
     await auth.use('web').login(user)
     response.redirect().toRoute('dashboard')
   }
