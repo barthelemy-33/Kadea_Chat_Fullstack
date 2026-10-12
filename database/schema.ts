@@ -7,6 +7,23 @@
 import { BaseModel, column } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 
+export class ConversationMemberSchema extends BaseModel {
+  static $columns = ['conversationId', 'joinedAt', 'lastReadMessageId', 'leftAt', 'role', 'userId'] as const
+  $columns = ConversationMemberSchema.$columns
+  @column({ isPrimary: true })
+  declare conversationId: number
+  @column.dateTime()
+  declare joinedAt: DateTime
+  @column()
+  declare lastReadMessageId: number | null
+  @column.dateTime()
+  declare leftAt: DateTime | null
+  @column()
+  declare role: string
+  @column()
+  declare userId: number
+}
+
 export class ConversationSchema extends BaseModel {
   static $columns = ['avatarUrl', 'createdAt', 'createdBy', 'id', 'lastMessageAt', 'name', 'privateKey', 'type', 'updatedAt'] as const
   $columns = ConversationSchema.$columns
