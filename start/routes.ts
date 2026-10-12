@@ -10,6 +10,7 @@
 import { middleware } from '#start/kernel'
 import { controllers } from '#generated/controllers'
 import router from '@adonisjs/core/services/router'
+const VerifyEmailsController = () => import('#controllers/verify_emails_controller')
 
 router.on('/').render('pages/home').as('home')
 
@@ -22,6 +23,8 @@ router
     router.post('login', [controllers.Session, 'store'])
   })
   .use(middleware.guest())
+
+router.get('verify-email/:token', [VerifyEmailsController, 'handle'])
 
 router
   .group(() => {
