@@ -1,0 +1,18 @@
+<div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px;">
+  <h2>Bienvenue sur {{ brandName }} {{ fullName ? ', ' + fullName : '' }} !</h2>
+
+  <p>Pour activer ton compte, confirme ton adresse e-mail en cliquant sur le bouton ci-dessous.</p>
+
+  <p>
+    <a
+      href="{{ verifyUrl }}"
+      style="display: inline-block; padding: 12px 24px; background: #0f766e; color: #ffffff; text-decoration: none; border-radius: 6px;"
+    >
+      Confirmer mon e-mail
+    </a>
+  </p>
+
+  <p style="color: #6b7280; font-size: 14px;">
+    Ce lien expire dans 24 heures. Si tu n'as pas créé de compte, ignore simplement cet e-mail.
+  </p>
+</div>
