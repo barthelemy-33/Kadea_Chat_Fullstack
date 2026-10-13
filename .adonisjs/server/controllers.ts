@@ -4,7 +4,9 @@
  */
 
 export const controllers = {
+  ForgotPasswords: () => import('#controllers/forgot_passwords_controller'),
   NewAccount: () => import('#controllers/new_account_controller'),
+  ResetPasswords: () => import('#controllers/reset_passwords_controller'),
   Session: () => import('#controllers/session_controller'),
   VerifyEmails: () => import('#controllers/verify_emails_controller'),
 }

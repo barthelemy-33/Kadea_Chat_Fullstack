@@ -6,11 +6,6 @@ import VerifyEmailNotification from '#mails/verify_email_notification'
 import mail from '@adonisjs/mail/services/main'
 import env from '#start/env'
 
-/**
- * NewAccountController handles user registration.
- * It provides methods for displaying the signup page and creating
- * new user accounts.
- */
 export default class NewAccountController {
   /**
    * Display the signup page
@@ -31,6 +26,6 @@ export default class NewAccountController {
     const verifyUrl = `${env.get('APP_URL')}/verify-email/${token}`
     await mail.send(new VerifyEmailNotification(user, verifyUrl))
     session.flash('success', 'Compte créé ! Vérifie ta boîte mail pour confirmer ton adresse.')
-    response.redirect().toRoute('session.create')
+    return response.redirect().toRoute('session.create')
   }
 }

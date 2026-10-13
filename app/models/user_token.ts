@@ -25,4 +25,18 @@ export default class UserToken extends UserTokenSchema {
 
     return token
   }
+
+  // Recherche d'un token valide.
+
+  static async findValid(token: string, type: 'verify_email' | 'reset_password') {
+    const tokenHash = createHash('sha256').update(token).digest('hex')
+
+    return this.query()
+      .where('tokenHash', tokenHash)
+      .where('type', type)
+      .whereNull('usedAt')
+      .where('expiresAt', '>', DateTime.now().toSQL())
+      .preload('user')
+      .first()
+  }
 }
