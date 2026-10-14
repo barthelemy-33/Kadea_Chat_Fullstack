@@ -43,4 +43,29 @@ export default class Conversation extends ConversationSchema {
 
     return membership !== null
   }
+
+  static async createGroup(creator: User, name: string, memberIds: number[]) {
+    // Garder seulement des utilisateurs qui existent, ont confirmé leur e-mail, et ne sont pas le créateur
+    const members = await User.query()
+      .whereIn('id', memberIds)
+      .whereNot('id', creator.id)
+      .whereNotNull('emailVerifiedAt')
+
+    // Créer la conversation de type groupe
+    const conversation = await this.create({ type: 'group', name, createdBy: creator.id })
+
+    // Ajouter le créateur en admin
+    await conversation.related('members').attach({
+      [creator.id]: { role: 'admin', joined_at: DateTime.now().toSQL() },
+    })
+
+    // Ajouter les autres en membres, un par un
+    for (const member of members) {
+      await conversation.related('members').attach({
+        [member.id]: { role: 'member', joined_at: DateTime.now().toSQL() },
+      })
+    }
+
+    return conversation
+  }
 }

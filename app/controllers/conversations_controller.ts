@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
 import Conversation from '#models/conversation'
+import { groupValidator } from '#validators/conversation'
 
 export default class ConversationsController {
   async index({ auth, view }: HttpContext) {
@@ -39,7 +40,10 @@ export default class ConversationsController {
       let initials = '?'
       let avatarUrl: string | null = null
 
-      if (other) {
+      if (conversation.type === 'group') {
+        title = conversation.name || 'Groupe'
+        initials = (conversation.name || 'G').slice(0, 2).toUpperCase()
+      } else if (other) {
         title = other.fullName || other.email
         initials = other.initials
         avatarUrl = other.avatarUrl
@@ -96,5 +100,12 @@ export default class ConversationsController {
       .orderBy('createdAt', 'asc')
 
     return view.render('pages/conversations/show', { conversation, messages, me: auth.user!.id })
+  }
+
+  async storeGroup({ auth, request, response }: HttpContext) {
+    const { name, memberIds } = await request.validateUsing(groupValidator)
+    const conversation = await Conversation.createGroup(auth.user!, name, memberIds)
+
+    return response.redirect().toRoute('conversations.show', { id: conversation.id })
   }
 }

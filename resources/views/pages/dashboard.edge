@@ -34,5 +34,23 @@
         <p>{{ item.preview }}</p>
       @end
     @end
+
+    <h2>Créer un groupe</h2>
+    @form({ route: 'groups.store', method: 'POST' })
+      @field.root({ name: 'name' })
+        @!field.label({ text: 'Nom du groupe' })
+        @!input.control({ type: 'text', placeholder: 'Ex : Team Foot' })
+        @!field.error()
+      @end
+
+      <p>Choisis les membres :</p>
+      @each(user in users)
+        <label>
+          <input type="checkbox" name="memberIds[]" value="{{ user.id }}" />
+          {{ user.fullName || user.email }}
+        </label>
+      @end
+      @!button({ text: 'Créer le groupe', type: 'submit' })
+    @end
   @end
 @end

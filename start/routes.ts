@@ -45,6 +45,7 @@ router
     router.get('conversations/:id', [controllers.Conversations, 'show']).as('conversations.show')
     router.post('conversations/:id/messages', [controllers.Messages, 'store']).as('messages.store')
     router.post('messages/:id/delete', [controllers.Messages, 'destroy']).as('messages.destroy')
+    router.post('groups', [controllers.Conversations, 'storeGroup']).as('groups.store')
   })
   .use(middleware.auth())
 
