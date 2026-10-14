@@ -3,6 +3,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { messageValidator } from '#validators/message'
 import Message from '#models/message'
 import { DateTime } from 'luxon'
+import transmit from '@adonisjs/transmit/services/main'
 
 export default class MessagesController {
   async store({ request, response, params, auth }: HttpContext) {
@@ -22,7 +23,7 @@ export default class MessagesController {
 
     // Creation du message
 
-    await Message.create({
+    const message = await Message.create({
       conversationId: conversation.id,
       senderId: auth.user!.id,
       content,
@@ -31,6 +32,13 @@ export default class MessagesController {
     conversation.lastMessageAt = DateTime.now()
     await conversation.save()
 
+    // Envoi du message à tous les abonnés du canal de cette conversation
+    transmit.broadcast(`conversations/${conversation.id}/messages`, {
+      id: message.id,
+      content: message.content,
+      senderName: auth.user!.fullName || auth.user!.email,
+      time: message.createdAt.toFormat('HH:mm'),
+    })
     return response.redirect().toRoute('conversations.show', { id: conversation.id })
   }
 }

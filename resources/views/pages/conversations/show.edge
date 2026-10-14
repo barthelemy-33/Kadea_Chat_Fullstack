@@ -1,22 +1,27 @@
 @layouts.app({ title: 'Conversation' })
   @page()
     <h1>Conversation #{{ conversation.id }}</h1>
-    @if(messages.length === 0)
-      <p>Aucun message pour l'instant. Écris le premier !</p>
-    @end
-    @each(message in messages)
-      <div style="margin-bottom: 12px;">
-        <strong>{{ message.sender.fullName || message.sender.email }}</strong>
-        <small>{{ message.createdAt.toFormat('HH:mm') }}</small>
-        <p>
-          @if(message.deletedAt)
-            <em>Ce message a été supprimé</em>
-          @else
-            {{ message.content }}
-          @end
-        </p>
+    <div x-data="chatRoom('conversations/{{ conversation.id }}/messages', '{{ csrfToken }}')">
+      @if(messages.length === 0)
+        <p x-ref="empty">Aucun message pour l'instant. Écris le premier !</p>
+      @end
+
+      <div x-ref="list">
+        @each(message in messages)
+          <div style="margin-bottom: 12px;">
+            <strong>{{ message.sender.fullName || message.sender.email }}</strong>
+            <small>{{ message.createdAt.toFormat('HH:mm') }}</small>
+            <p>
+              @if(message.deletedAt)
+                <em>Ce message a été supprimé</em>
+              @else
+                {{ message.content }}
+              @end
+            </p>
+          </div>
+        @end
       </div>
-    @end
+    </div>
     @form({
       route: 'messages.store',
       routeParams: { id: conversation.id },
