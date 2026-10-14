@@ -33,4 +33,14 @@ export default class Conversation extends ConversationSchema {
     })
     return conversation
   }
+  async isMember(user: User) {
+    const membership = await (this as Conversation)
+      .related('members')
+      .query()
+      .where('users.id', user.id)
+      .whereNull('conversation_members.left_at')
+      .first()
+
+    return membership !== null
+  }
 }

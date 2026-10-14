@@ -20,8 +20,21 @@ export default class ConversationsController {
       return response.redirect().toRoute('dashboard')
     }
 
-    await Conversation.findOrCreatePrivate(me, other)
+    const conversation = await Conversation.findOrCreatePrivate(me, other)
+    return response.redirect().toRoute('conversations.show', { id: conversation.id })
+  }
+  async show({ auth, view, params, response }: HttpContext) {
+    const conversation = await Conversation.findOrFail(params.id)
+    if (!(await conversation.isMember(auth.user!))) {
+      return response.forbidden('Accès refusé')
+    }
 
-    return response.redirect().toRoute('dashboard')
+    const messages = await conversation
+      .related('messages')
+      .query()
+      .preload('sender')
+      .orderBy('createdAt', 'asc')
+
+    return view.render('pages/conversations/show', { conversation, messages })
   }
 }

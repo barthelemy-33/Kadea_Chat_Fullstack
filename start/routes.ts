@@ -10,7 +10,6 @@
 import { middleware } from '#start/kernel'
 import { controllers } from '#generated/controllers'
 import router from '@adonisjs/core/services/router'
-const ConversationsController = () => import('#controllers/conversations_controller')
 
 router.on('/').render('pages/home').as('home')
 
@@ -39,8 +38,9 @@ router
   .as('reset_password.store')
 router
   .group(() => {
-    router.get('/dashboard', [ConversationsController, 'index']).as('dashboard')
+    router.get('/dashboard', [controllers.Conversations, 'index']).as('dashboard')
     router.post('logout', [controllers.Session, 'destroy'])
-    router.post('conversations', [ConversationsController, 'store']).as('conversations.store')
+    router.post('conversations', [controllers.Conversations, 'store']).as('conversations.store')
+    router.get('conversations/:id', [controllers.Conversations, 'show']).as('conversations.show')
   })
   .use(middleware.auth())

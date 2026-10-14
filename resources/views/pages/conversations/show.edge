@@ -1,0 +1,21 @@
+@layouts.app({ title: 'Conversation' })
+  @page()
+    <h1>Conversation #{{ conversation.id }}</h1>
+    @if(messages.length === 0)
+      <p>Aucun message pour l'instant. Écris le premier !</p>
+    @end
+    @each(message in messages)
+      <div style="margin-bottom: 12px;">
+        <strong>{{ message.sender.fullName || message.sender.email }}</strong>
+        <small>{{ message.createdAt.toFormat('HH:mm') }}</small>
+        <p>
+          @if(message.deletedAt)
+            <em>Ce message a été supprimé</em>
+          @else
+            {{ message.content }}
+          @end
+        </p>
+      </div>
+    @end
+  @end
+@end
