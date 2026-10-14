@@ -17,5 +17,20 @@
         </p>
       </div>
     @end
+    @form({
+      route: 'messages.store',
+      routeParams: { id: conversation.id },
+      method: 'POST',
+    })
+      @field.root({ name: 'content' })
+        @!input.control({
+          type: 'text',
+          placeholder: 'Écris un message...',
+          autocomplete: 'off',
+        })
+        @!field.error()
+      @end
+      @!button({ text: 'Envoyer', type: 'submit' })
+    @end
   @end
 @end
