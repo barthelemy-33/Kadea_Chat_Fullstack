@@ -99,7 +99,37 @@ export default class ConversationsController {
       .preload('sender')
       .orderBy('createdAt', 'asc')
 
-    return view.render('pages/conversations/show', { conversation, messages, me: auth.user!.id })
+    const members = await conversation
+      .related('members')
+      .query()
+      .whereNull('conversation_members.left_at')
+      .orderBy('fullName')
+
+    const memberItems = []
+    let title = conversation.name || 'Groupe'
+
+    for (const member of members) {
+      memberItems.push({
+        id: member.id,
+        name: member.fullName || member.email,
+        role: member.$extras.pivot_role,
+      })
+
+      if (conversation.type === 'private' && member.id !== auth.user!.id) {
+        title = member.fullName || member.email
+      }
+    }
+
+    const isAdmin = await conversation.isAdmin(auth.user!)
+
+    return view.render('pages/conversations/show', {
+      conversation,
+      messages,
+      me: auth.user!.id,
+      title,
+      memberItems,
+      isAdmin,
+    })
   }
 
   async storeGroup({ auth, request, response }: HttpContext) {

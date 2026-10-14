@@ -1,6 +1,20 @@
 @layouts.app({ title: 'Conversation' })
   @page()
-    <h1>Conversation #{{ conversation.id }}</h1>
+    <h1>{{ title }}</h1>
+    @if(conversation.type === 'group')
+      <h2>Membres ({{ memberItems.length }})</h2>
+      <ul>
+        @each(member in memberItems)
+          <li>
+            {{ member.name }}
+            @if(member.role === 'admin')
+              <strong>(admin)</strong>
+            @end
+          </li>
+        @end
+      </ul>
+    @end
+
     <div x-data="chatRoom('conversations/{{ conversation.id }}/messages', '{{ csrfToken }}')">
       @if(messages.length === 0)
         <p x-ref="empty">Aucun message pour l'instant. Écris le premier !</p>

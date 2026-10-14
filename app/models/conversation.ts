@@ -45,7 +45,7 @@ export default class Conversation extends ConversationSchema {
   }
 
   static async createGroup(creator: User, name: string, memberIds: number[]) {
-    // Garder seulement des utilisateurs qui existent, ont confirmé leur e-mail, et ne sont pas le créateur
+    // Garder seulement des utilisateurs qui existent, ont confirmé leur e-mail
     const members = await User.query()
       .whereIn('id', memberIds)
       .whereNot('id', creator.id)
@@ -67,5 +67,17 @@ export default class Conversation extends ConversationSchema {
     }
 
     return conversation
+  }
+
+  async isAdmin(user: User) {
+    const membership = await (this as Conversation)
+      .related('members')
+      .query()
+      .where('users.id', user.id)
+      .whereNull('conversation_members.left_at')
+      .where('conversation_members.role', 'admin')
+      .first()
+
+    return membership !== null
   }
 }
