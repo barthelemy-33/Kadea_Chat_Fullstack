@@ -95,6 +95,6 @@ export default class ConversationsController {
       .preload('sender')
       .orderBy('createdAt', 'asc')
 
-    return view.render('pages/conversations/show', { conversation, messages })
+    return view.render('pages/conversations/show', { conversation, messages, me: auth.user!.id })
   }
 }

@@ -13,11 +13,23 @@
             <small>{{ message.createdAt.toFormat('HH:mm') }}</small>
             <p>
               @if(message.deletedAt)
-                <em>Ce message a été supprimé</em>
+                <em>
+                  Ce message a été supprimé le
+                  {{ message.deletedAt.toFormat('dd/MM à HH:mm') }}
+                </em>
               @else
                 {{ message.content }}
               @end
             </p>
+            @if(message.senderId === me && !message.deletedAt)
+              @form({
+                route: 'messages.destroy',
+                routeParams: { id: message.id },
+                method: 'POST',
+              })
+                @!button({ text: 'Supprimer', type: 'submit' })
+              @end
+            @end
           </div>
         @end
       </div>

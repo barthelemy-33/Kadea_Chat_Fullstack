@@ -41,4 +41,16 @@ export default class MessagesController {
     })
     return response.redirect().toRoute('conversations.show', { id: conversation.id })
   }
+  async destroy({ response, params, auth }: HttpContext) {
+    const message = await Message.findOrFail(params.id)
+
+    if (message.senderId !== auth.user!.id) {
+      return response.forbidden('Accès refusé')
+    }
+
+    message.deletedAt = DateTime.now()
+    await message.save()
+
+    return response.redirect().toRoute('conversations.show', { id: message.conversationId })
+  }
 }
