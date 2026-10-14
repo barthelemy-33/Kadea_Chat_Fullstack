@@ -10,13 +10,28 @@
     @end
 
     <h2>Mes conversations</h2>
-    @if(conversations.length === 0)
-      <p>Aucune conversation pour l'instant. Choisis quelqu’un dans la liste des utilisateurs.</p>
+    @if(conversationItems.length === 0)
+      <p>Aucune conversation pour l'instant. Choisis quelqu'un dans la liste des utilisateurs.</p>
     @end
-    @each(conversation in conversations)
-      @let(other = conversation.members.find((member) => member.id !== me))
-      @link({ route: 'conversations.show', routeParams: { id: conversation.id } })
-        {{ other ? other.fullName || other.email : 'Conversation' }}
+    @each(item in conversationItems)
+      @link({ route: 'conversations.show', routeParams: { id: item.id } })
+        @if(item.avatarUrl)
+          <img
+            src="{{ item.avatarUrl }}"
+            alt=""
+            style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;"
+          />
+        @else
+          <span
+            style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: #0f766e; color: #fff; font-size: 14px;"
+          >
+            {{ item.initials }}
+          </span>
+        @end
+
+        <strong>{{ item.title }}</strong>
+        <small>{{ item.date }}</small>
+        <p>{{ item.preview }}</p>
       @end
     @end
   @end

@@ -15,7 +15,61 @@ export default class ConversationsController {
       .whereNull('conversation_members.left_at')
       .preload('members')
       .orderByRaw('conversations.last_message_at DESC NULLS LAST')
-    return view.render('pages/dashboard', { users, conversations, me: auth.user!.id })
+
+    const conversationItems = []
+
+    for (const conversation of conversations) {
+      // Trouver l'autre membre
+      let other: User | null = null
+      for (const member of conversation.members) {
+        if (member.id !== auth.user!.id) {
+          other = member
+        }
+      }
+
+      // Chercher le dernier message
+      const lastMessage = await conversation
+        .related('messages')
+        .query()
+        .orderBy('createdAt', 'desc')
+        .first()
+
+      // Préparer le nom, les initiales et la photo
+      let title = 'Conversation'
+      let initials = '?'
+      let avatarUrl: string | null = null
+
+      if (other) {
+        title = other.fullName || other.email
+        initials = other.initials
+        avatarUrl = other.avatarUrl
+      }
+
+      // Préparer l'aperçu et la date
+      let preview = 'Aucun message'
+      let date = ''
+
+      if (lastMessage) {
+        if (lastMessage.deletedAt) {
+          preview = 'Message supprimé'
+        } else {
+          preview = lastMessage.content || ''
+        }
+        date = lastMessage.createdAt.toFormat('dd/MM HH:mm')
+      }
+
+      // Ajouter l'objet à la liste
+      conversationItems.push({
+        id: conversation.id,
+        title,
+        initials,
+        avatarUrl,
+        preview,
+        date,
+      })
+    }
+
+    return view.render('pages/dashboard', { users, conversationItems })
   }
   async store({ auth, request, response, session }: HttpContext) {
     const me = auth.user!
