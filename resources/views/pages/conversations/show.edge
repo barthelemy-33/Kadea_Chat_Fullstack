@@ -8,10 +8,10 @@
 
       <div x-ref="list">
         @each(message in messages)
-          <div style="margin-bottom: 12px;">
+          <div id="message-{{ message.id }}" style="margin-bottom: 12px;">
             <strong>{{ message.sender.fullName || message.sender.email }}</strong>
             <small>{{ message.createdAt.toFormat('HH:mm') }}</small>
-            <p>
+            <p data-body>
               @if(message.deletedAt)
                 <em>
                   Ce message a été supprimé le
@@ -22,13 +22,15 @@
               @end
             </p>
             @if(message.senderId === me && !message.deletedAt)
-              @form({
-                route: 'messages.destroy',
-                routeParams: { id: message.id },
-                method: 'POST',
-              })
-                @!button({ text: 'Supprimer', type: 'submit' })
-              @end
+              <div data-delete>
+                @form({
+                  route: 'messages.destroy',
+                  routeParams: { id: message.id },
+                  method: 'POST',
+                })
+                  @!button({ text: 'Supprimer', type: 'submit' })
+                @end
+              </div>
             @end
           </div>
         @end

@@ -34,6 +34,7 @@ export default class MessagesController {
 
     // Envoi du message à tous les abonnés du canal de cette conversation
     transmit.broadcast(`conversations/${conversation.id}/messages`, {
+      type: 'new',
       id: message.id,
       content: message.content,
       senderName: auth.user!.fullName || auth.user!.email,
@@ -48,8 +49,15 @@ export default class MessagesController {
       return response.forbidden('Accès refusé')
     }
 
-    message.deletedAt = DateTime.now()
+    const deletedAt = DateTime.now()
+    message.deletedAt = deletedAt
     await message.save()
+
+    transmit.broadcast(`conversations/${message.conversationId}/messages`, {
+      type: 'deleted',
+      id: message.id,
+      deletedAt: deletedAt.toFormat('dd/MM à HH:mm'),
+    })
 
     return response.redirect().toRoute('conversations.show', { id: message.conversationId })
   }

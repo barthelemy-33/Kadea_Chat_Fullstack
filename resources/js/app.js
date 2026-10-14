@@ -49,7 +49,11 @@ Alpine.data('chatRoom', function (channel, csrfToken) {
       await subscription.create()
 
       subscription.onMessage((data) => {
-        this.addMessage(data)
+        if (data.type === 'deleted') {
+          this.markDeleted(data)
+        } else {
+          this.addMessage(data)
+        }
       })
     },
 
@@ -70,8 +74,27 @@ Alpine.data('chatRoom', function (channel, csrfToken) {
       const content = document.createElement('p')
       content.textContent = data.content
 
+      wrapper.id = 'message-' + data.id
+      content.setAttribute('data-body', '')
+
       wrapper.append(name, time, content)
       this.$refs.list.appendChild(wrapper)
+    },
+    markDeleted(data) {
+      const block = document.getElementById('message-' + data.id)
+      if (!block) {
+        return
+      }
+
+      const body = block.querySelector('[data-body]')
+      const indication = document.createElement('em')
+      indication.textContent = 'Ce message a été supprimé le ' + data.deletedAt
+      body.replaceChildren(indication)
+
+      const deleteButton = block.querySelector('[data-delete]')
+      if (deleteButton) {
+        deleteButton.remove()
+      }
     },
   }
 })
