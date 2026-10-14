@@ -10,7 +10,7 @@
 import { middleware } from '#start/kernel'
 import { controllers } from '#generated/controllers'
 import router from '@adonisjs/core/services/router'
-const ResetPasswordsController = () => import('#controllers/reset_passwords_controller')
+const ConversationsController = () => import('#controllers/conversations_controller')
 
 router.on('/').render('pages/home').as('home')
 
@@ -32,12 +32,15 @@ router
 
 router.get('verify-email/:token', [controllers.VerifyEmails, 'handle'])
 router
-  .get('reset-password/:token', [ResetPasswordsController, 'create'])
+  .get('reset-password/:token', [controllers.ResetPasswords, 'create'])
   .as('reset_password.create')
-router.post('reset-password/:token', [ResetPasswordsController, 'store']).as('reset_password.store')
+router
+  .post('reset-password/:token', [controllers.ResetPasswords, 'store'])
+  .as('reset_password.store')
 router
   .group(() => {
-    router.on('/dashboard').render('pages/dashboard').as('dashboard')
+    router.get('/dashboard', [ConversationsController, 'index']).as('dashboard')
     router.post('logout', [controllers.Session, 'destroy'])
+    router.post('conversations', [ConversationsController, 'store']).as('conversations.store')
   })
   .use(middleware.auth())
