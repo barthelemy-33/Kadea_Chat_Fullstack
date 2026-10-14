@@ -9,7 +9,13 @@ export default class ConversationsController {
       .whereNotNull('emailVerifiedAt')
       .orderBy('fullName')
 
-    return view.render('pages/dashboard', { users })
+    const conversations = await auth
+      .user!.related('conversations')
+      .query()
+      .whereNull('conversation_members.left_at')
+      .preload('members')
+      .orderByRaw('conversations.last_message_at DESC NULLS LAST')
+    return view.render('pages/dashboard', { users, conversations, me: auth.user!.id })
   }
   async store({ auth, request, response, session }: HttpContext) {
     const me = auth.user!

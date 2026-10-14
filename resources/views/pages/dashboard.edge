@@ -8,5 +8,16 @@
         @!button({ text: 'Discuter', type: 'submit' })
       @end
     @end
+
+    <h2>Mes conversations</h2>
+    @if(conversations.length === 0)
+      <p>Aucune conversation pour l'instant. Choisis quelqu’un dans la liste des utilisateurs.</p>
+    @end
+    @each(conversation in conversations)
+      @let(other = conversation.members.find((member) => member.id !== me))
+      @link({ route: 'conversations.show', routeParams: { id: conversation.id } })
+        {{ other ? other.fullName || other.email : 'Conversation' }}
+      @end
+    @end
   @end
 @end
