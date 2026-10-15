@@ -14,3 +14,8 @@ transmit.authorize<{ id: string }>('conversations/:id/messages', async (ctx, { i
 
   return conversation.isMember(user)
 })
+
+transmit.authorize<{ id: string }>('users/:id', (ctx, { id }) => {
+  const user = ctx.auth.user
+  return user !== undefined && user.id === +id
+})

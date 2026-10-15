@@ -4,6 +4,7 @@ import type { HasMany, ManyToMany } from '@adonisjs/lucid/types/relations'
 import Message from '#models/message'
 import User from '#models/user'
 import { DateTime } from 'luxon'
+import transmit from '@adonisjs/transmit/services/main'
 
 export default class Conversation extends ConversationSchema {
   @hasMany(() => Message)
@@ -79,5 +80,18 @@ export default class Conversation extends ConversationSchema {
       .first()
 
     return membership !== null
+  }
+
+  async notifyMembers(exceptUserId: number) {
+    const members = await (this as Conversation)
+      .related('members')
+      .query()
+      .whereNull('conversation_members.left_at')
+
+    for (const member of members) {
+      if (member.id !== exceptUserId) {
+        transmit.broadcast(`users/${member.id}`, { type: 'conversations_changed' })
+      }
+    }
   }
 }

@@ -40,6 +40,9 @@ export default class MessagesController {
       senderName: auth.user!.fullName || auth.user!.email,
       time: message.createdAt.toFormat('HH:mm'),
     })
+
+    await conversation.notifyMembers(auth.user!.id)
+
     return response.redirect().toRoute('conversations.show', { id: conversation.id })
   }
   async destroy({ response, params, auth }: HttpContext) {

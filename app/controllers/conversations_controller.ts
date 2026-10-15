@@ -73,7 +73,7 @@ export default class ConversationsController {
       })
     }
 
-    return view.render('pages/dashboard', { users, conversationItems })
+    return view.render('pages/dashboard', { users, conversationItems, me: auth.user!.id })
   }
   async store({ auth, request, response, session }: HttpContext) {
     const me = auth.user!
@@ -85,6 +85,8 @@ export default class ConversationsController {
     }
 
     const conversation = await Conversation.findOrCreatePrivate(me, other)
+    await conversation.notifyMembers(me.id)
+
     return response.redirect().toRoute('conversations.show', { id: conversation.id })
   }
   async show({ auth, view, params, response }: HttpContext) {
@@ -146,6 +148,7 @@ export default class ConversationsController {
   async storeGroup({ auth, request, response }: HttpContext) {
     const { name, memberIds } = await request.validateUsing(groupValidator)
     const conversation = await Conversation.createGroup(auth.user!, name, memberIds)
+    await conversation.notifyMembers(auth.user!.id)
 
     return response.redirect().toRoute('conversations.show', { id: conversation.id })
   }

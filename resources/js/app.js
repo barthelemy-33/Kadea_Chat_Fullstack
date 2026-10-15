@@ -33,7 +33,7 @@ Alpine.data('themeToggle', function () {
   }
 })
 
-Alpine.data('chatRoom', function (channel, csrfToken) {
+Alpine.data('chatRoom', function (channel, csrfToken, me) {
   return {
     async init() {
       const transmit = new Transmit({
@@ -51,6 +51,8 @@ Alpine.data('chatRoom', function (channel, csrfToken) {
       subscription.onMessage((data) => {
         if (data.type === 'deleted') {
           this.markDeleted(data)
+        } else if (data.type === 'member_added' || data.type === 'member_removed') {
+          this.membersChanged(data)
         } else {
           this.addMessage(data)
         }
@@ -95,6 +97,43 @@ Alpine.data('chatRoom', function (channel, csrfToken) {
       if (deleteButton) {
         deleteButton.remove()
       }
+    },
+    membersChanged(data) {
+      // Si c'est moi qui ai fait l'action, ma page se recharge déjà
+      if (data.by === me) {
+        return
+      }
+
+      // Si c'est moi qui suis retiré je quitte la page
+      if (data.type === 'member_removed' && data.userId === me) {
+        window.location.href = '/dashboard'
+        return
+      }
+
+      // Sinon la liste des membres a changé on recharge
+      window.location.reload()
+    },
+  }
+})
+
+Alpine.data('dashboardLive', function (channel, csrfToken) {
+  return {
+    async init() {
+      const transmit = new Transmit({
+        baseUrl: window.location.origin,
+        beforeSubscribe: (request) => {
+          request.headers.set('X-CSRF-TOKEN', csrfToken)
+        },
+        beforeUnsubscribe: (request) => {
+          request.headers.set('X-CSRF-TOKEN', csrfToken)
+        },
+      })
+      const subscription = transmit.subscription(channel)
+      await subscription.create()
+
+      subscription.onMessage(() => {
+        window.location.reload()
+      })
     },
   }
 })

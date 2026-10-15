@@ -47,7 +47,9 @@
       @end
     @end
 
-    <div x-data="chatRoom('conversations/{{ conversation.id }}/messages', '{{ csrfToken }}')">
+    <div
+      x-data="chatRoom('conversations/{{ conversation.id }}/messages', '{{ csrfToken }}', {{ me }})"
+    >
       @if(messages.length === 0)
         <p x-ref="empty">Aucun message pour l'instant. Écris le premier !</p>
       @end
