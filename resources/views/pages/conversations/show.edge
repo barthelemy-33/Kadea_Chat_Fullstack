@@ -10,9 +10,41 @@
             @if(member.role === 'admin')
               <strong>(admin)</strong>
             @end
+            @if(isAdmin && member.id !== me)
+              @form({
+                route: 'members.destroy',
+                routeParams: { id: conversation.id, userId: member.id },
+                method: 'POST',
+              })
+                @!button({ text: 'Retirer', type: 'submit' })
+              @end
+            @end
           </li>
         @end
       </ul>
+      @if(isAdmin && candidates.length > 0)
+        @form({
+          route: 'members.store',
+          routeParams: { id: conversation.id },
+          method: 'POST',
+        })
+          <select name="userId">
+            @each(user in candidates)
+              <option value="{{ user.id }}">{{ user.fullName || user.email }}</option>
+            @end
+          </select>
+          @!button({ text: 'Ajouter', type: 'submit' })
+        @end
+      @end
+      @if(!isAdmin)
+        @form({
+          route: 'members.leave',
+          routeParams: { id: conversation.id },
+          method: 'POST',
+        })
+          @!button({ text: 'Quitter le groupe', type: 'submit' })
+        @end
+      @end
     @end
 
     <div x-data="chatRoom('conversations/{{ conversation.id }}/messages', '{{ csrfToken }}')">

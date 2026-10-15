@@ -120,6 +120,16 @@ export default class ConversationsController {
       }
     }
 
+    const currentIds = []
+    for (const item of memberItems) {
+      currentIds.push(item.id)
+    }
+
+    const candidates = await User.query()
+      .whereNotNull('emailVerifiedAt')
+      .whereNotIn('id', currentIds)
+      .orderBy('fullName')
+
     const isAdmin = await conversation.isAdmin(auth.user!)
 
     return view.render('pages/conversations/show', {
@@ -129,6 +139,7 @@ export default class ConversationsController {
       title,
       memberItems,
       isAdmin,
+      candidates,
     })
   }
 

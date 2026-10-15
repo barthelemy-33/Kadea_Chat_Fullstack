@@ -46,6 +46,13 @@ router
     router.post('conversations/:id/messages', [controllers.Messages, 'store']).as('messages.store')
     router.post('messages/:id/delete', [controllers.Messages, 'destroy']).as('messages.destroy')
     router.post('groups', [controllers.Conversations, 'storeGroup']).as('groups.store')
+    router
+      .post('conversations/:id/members', [controllers.GroupMembers, 'store'])
+      .as('members.store')
+    router
+      .post('conversations/:id/members/:userId/remove', [controllers.GroupMembers, 'destroy'])
+      .as('members.destroy')
+    router.post('conversations/:id/leave', [controllers.GroupMembers, 'leave']).as('members.leave')
   })
   .use(middleware.auth())
 
