@@ -56,10 +56,14 @@
 
       <div x-ref="list">
         @each(message in messages)
-          <div id="message-{{ message.id }}" style="margin-bottom: 12px;">
+          <div
+            id="message-{{ message.id }}"
+            style="margin-bottom: 12px;"
+            x-data="{ editing: false }"
+          >
             <strong>{{ message.sender.fullName || message.sender.email }}</strong>
             <small>{{ message.createdAt.toFormat('HH:mm') }}</small>
-            <p data-body>
+            <p data-body x-show="!editing">
               @if(message.deletedAt)
                 <em>
                   Ce message a été supprimé le
@@ -69,8 +73,30 @@
                 {{ message.content }}
               @end
             </p>
+            @if(message.editedAt && !message.deletedAt)
+              <small data-edited>(modifié)</small>
+            @end
             @if(message.senderId === me && !message.deletedAt)
               <div data-delete>
+                <button type="button" x-show="!editing" x-on:click="editing = true">
+                  Modifier
+                </button>
+                <div x-show="editing">
+                  @form({
+                    route: 'messages.update',
+                    routeParams: { id: message.id },
+                    method: 'POST',
+                  })
+                    <input
+                      type="text"
+                      name="content"
+                      value="{{ message.content }}"
+                      autocomplete="off"
+                    />
+                    @!button({ text: 'Enregistrer', type: 'submit' })
+                    <button type="button" x-on:click="editing = false">Annuler</button>
+                  @end
+                </div>
                 @form({
                   route: 'messages.destroy',
                   routeParams: { id: message.id },

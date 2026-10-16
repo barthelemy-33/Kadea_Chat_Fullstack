@@ -48,7 +48,7 @@ export class ConversationSchema extends BaseModel {
 }
 
 export class MessageSchema extends BaseModel {
-  static $columns = ['content', 'conversationId', 'createdAt', 'deletedAt', 'id', 'senderId', 'type', 'updatedAt'] as const
+  static $columns = ['content', 'conversationId', 'createdAt', 'deletedAt', 'editedAt', 'id', 'senderId', 'type', 'updatedAt'] as const
   $columns = MessageSchema.$columns
   @column()
   declare content: string | null
@@ -58,6 +58,8 @@ export class MessageSchema extends BaseModel {
   declare createdAt: DateTime
   @column.dateTime()
   declare deletedAt: DateTime | null
+  @column.dateTime()
+  declare editedAt: DateTime | null
   @column({ isPrimary: true })
   declare id: number
   @column()

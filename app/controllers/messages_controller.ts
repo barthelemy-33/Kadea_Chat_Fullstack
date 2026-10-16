@@ -47,8 +47,9 @@ export default class MessagesController {
   }
   async destroy({ response, params, auth }: HttpContext) {
     const message = await Message.findOrFail(params.id)
+    const conversation = await Conversation.findOrFail(message.conversationId)
 
-    if (message.senderId !== auth.user!.id) {
+    if (message.senderId !== auth.user!.id || !(await conversation.isMember(auth.user!))) {
       return response.forbidden('Accès refusé')
     }
 
@@ -63,5 +64,33 @@ export default class MessagesController {
     })
 
     return response.redirect().toRoute('conversations.show', { id: message.conversationId })
+  }
+
+  async update({ params, request, response, auth }: HttpContext) {
+    const message = await Message.findOrFail(params.id)
+    const conversation = await Conversation.findOrFail(message.conversationId)
+
+    // Seul l'auteur, sur un message non supprimé, et encore membre
+    if (
+      message.senderId !== auth.user!.id ||
+      message.deletedAt ||
+      !(await conversation.isMember(auth.user!))
+    ) {
+      return response.forbidden('Accès refusé')
+    }
+
+    const { content } = await request.validateUsing(messageValidator)
+
+    message.content = content
+    message.editedAt = DateTime.now()
+    await message.save()
+
+    transmit.broadcast(`conversations/${conversation.id}/messages`, {
+      type: 'edited',
+      id: message.id,
+      content: message.content,
+    })
+
+    return response.redirect().toRoute('conversations.show', { id: conversation.id })
   }
 }

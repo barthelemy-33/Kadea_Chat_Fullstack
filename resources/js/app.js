@@ -51,6 +51,8 @@ Alpine.data('chatRoom', function (channel, csrfToken, me) {
       subscription.onMessage((data) => {
         if (data.type === 'deleted') {
           this.markDeleted(data)
+        } else if (data.type === 'edited') {
+          this.markEdited(data)
         } else if (data.type === 'member_added' || data.type === 'member_removed') {
           this.membersChanged(data)
         } else {
@@ -96,6 +98,22 @@ Alpine.data('chatRoom', function (channel, csrfToken, me) {
       const deleteButton = block.querySelector('[data-delete]')
       if (deleteButton) {
         deleteButton.remove()
+      }
+    },
+    markEdited(data) {
+      const block = document.getElementById('message-' + data.id)
+      if (!block) {
+        return
+      }
+
+      const body = block.querySelector('[data-body]')
+      body.textContent = data.content
+
+      if (!block.querySelector('[data-edited]')) {
+        const mention = document.createElement('small')
+        mention.setAttribute('data-edited', '')
+        mention.textContent = ' (modifié)'
+        body.after(mention)
       }
     },
     membersChanged(data) {

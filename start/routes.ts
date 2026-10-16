@@ -53,6 +53,7 @@ router
       .post('conversations/:id/members/:userId/remove', [controllers.GroupMembers, 'destroy'])
       .as('members.destroy')
     router.post('conversations/:id/leave', [controllers.GroupMembers, 'leave']).as('members.leave')
+    router.post('messages/:id/update', [controllers.Messages, 'update']).as('messages.update')
   })
   .use(middleware.auth())
 
