@@ -28,6 +28,7 @@ export type ScannedRoutes = {
     'profile.show': { paramsTuple?: []; params?: {} }
     'profile.name': { paramsTuple?: []; params?: {} }
     'profile.password': { paramsTuple?: []; params?: {} }
+    'profile.avatar': { paramsTuple?: []; params?: {} }
     'event_stream': { paramsTuple?: []; params?: {} }
     'subscribe': { paramsTuple?: []; params?: {} }
     'unsubscribe': { paramsTuple?: []; params?: {} }
@@ -72,6 +73,7 @@ export type ScannedRoutes = {
     'messages.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'profile.name': { paramsTuple?: []; params?: {} }
     'profile.password': { paramsTuple?: []; params?: {} }
+    'profile.avatar': { paramsTuple?: []; params?: {} }
     'subscribe': { paramsTuple?: []; params?: {} }
     'unsubscribe': { paramsTuple?: []; params?: {} }
   }

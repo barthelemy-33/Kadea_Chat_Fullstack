@@ -57,6 +57,7 @@ router
     router.get('profile', [controllers.Profile, 'show']).as('profile.show')
     router.post('profile/name', [controllers.Profile, 'updateName']).as('profile.name')
     router.post('profile/password', [controllers.Profile, 'updatePassword']).as('profile.password')
+    router.post('profile/avatar', [controllers.Profile, 'updateAvatar']).as('profile.avatar')
   })
   .use(middleware.auth())
 

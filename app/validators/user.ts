@@ -48,3 +48,13 @@ export const changePasswordValidator = vine.create({
   password: password(),
   passwordConfirmation: password().sameAs('password'),
 })
+
+/**
+ * Validator to use when uploading an avatar
+ */
+export const avatarValidator = vine.create({
+  avatar: vine.file({
+    size: '2mb',
+    extnames: ['jpg', 'jpeg', 'png', 'webp'],
+  }),
+})

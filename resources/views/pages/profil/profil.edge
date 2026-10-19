@@ -1,6 +1,27 @@
 @layouts.app({ title: 'Mon profil' })
   @page()
     <h1>Mon profil</h1>
+    <h2>Ma photo</h2>
+    @if(user.avatarUrl)
+      <img
+        src="{{ user.avatarUrl }}"
+        alt="Ma photo de profil"
+        width="96"
+        height="96"
+        style="border-radius: 50%; object-fit: cover;"
+      />
+    @else
+      <p>Tu n'as pas encore de photo.</p>
+    @end
+    @form({ route: 'profile.avatar', method: 'POST', enctype: 'multipart/form-data' })
+      @field.root({ name: 'avatar' })
+        @!field.label({ text: 'Choisir une image (JPG, PNG ou WebP, 2 Mo maximum)' })
+        <input type="file" name="avatar" accept="image/jpeg,image/png,image/webp" />
+        @!field.error()
+      @end
+      @!button({ text: 'Enregistrer la photo', type: 'submit' })
+    @end
+
     <p>Adresse e-mail : {{ user.email }}</p>
 
     <h2>Mon nom</h2>
