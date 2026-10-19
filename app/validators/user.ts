@@ -32,3 +32,19 @@ export const resetPasswordValidator = vine.create({
   password: password(),
   passwordConfirmation: password().sameAs('password'),
 })
+
+/**
+ * Validator to use when updating the profile name
+ */
+export const profileValidator = vine.create({
+  fullName: vine.string().trim().minLength(2).maxLength(100),
+})
+
+/**
+ * Validator to use when changing the password
+ */
+export const changePasswordValidator = vine.create({
+  currentPassword: vine.string(),
+  password: password(),
+  passwordConfirmation: password().sameAs('password'),
+})

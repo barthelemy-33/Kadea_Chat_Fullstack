@@ -54,6 +54,9 @@ router
       .as('members.destroy')
     router.post('conversations/:id/leave', [controllers.GroupMembers, 'leave']).as('members.leave')
     router.post('messages/:id/update', [controllers.Messages, 'update']).as('messages.update')
+    router.get('profile', [controllers.Profile, 'show']).as('profile.show')
+    router.post('profile/name', [controllers.Profile, 'updateName']).as('profile.name')
+    router.post('profile/password', [controllers.Profile, 'updatePassword']).as('profile.password')
   })
   .use(middleware.auth())
 

@@ -9,6 +9,7 @@ export const controllers = {
   GroupMembers: () => import('#controllers/group_members_controller'),
   Messages: () => import('#controllers/messages_controller'),
   NewAccount: () => import('#controllers/new_account_controller'),
+  Profile: () => import('#controllers/profile_controller'),
   ResetPasswords: () => import('#controllers/reset_passwords_controller'),
   Session: () => import('#controllers/session_controller'),
   VerifyEmails: () => import('#controllers/verify_emails_controller'),

@@ -1,0 +1,36 @@
+@layouts.app({ title: 'Mon profil' })
+  @page()
+    <h1>Mon profil</h1>
+    <p>Adresse e-mail : {{ user.email }}</p>
+
+    <h2>Mon nom</h2>
+    @form({ route: 'profile.name', method: 'POST' })
+      @field.root({ name: 'fullName' })
+        @!field.label({ text: 'Nom complet' })
+        <input type="text" name="fullName" value="{{ user.fullName || '' }}" />
+        @!field.error()
+      @end
+      @!button({ text: 'Enregistrer le nom', type: 'submit' })
+    @end
+
+    <h2>Mon mot de passe</h2>
+    @form({ route: 'profile.password', method: 'POST' })
+      @field.root({ name: 'currentPassword' })
+        @!field.label({ text: 'Mot de passe actuel' })
+        @!input.control({ type: 'password', autocomplete: 'current-password' })
+        @!field.error()
+      @end
+      @field.root({ name: 'password' })
+        @!field.label({ text: 'Nouveau mot de passe' })
+        @!input.control({ type: 'password', autocomplete: 'new-password' })
+        @!field.error()
+      @end
+      @field.root({ name: 'passwordConfirmation' })
+        @!field.label({ text: 'Confirme le nouveau mot de passe' })
+        @!input.control({ type: 'password', autocomplete: 'new-password' })
+        @!field.error()
+      @end
+      @!button({ text: 'Changer le mot de passe', type: 'submit' })
+    @end
+  @end
+@end
