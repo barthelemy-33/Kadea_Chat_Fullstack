@@ -1,8 +1,21 @@
 @layouts.app({ title: 'Dashboard' })
   @page()
     <div x-data="dashboardLive('users/{{ me }}', '{{ csrfToken }}')">
-      <h1>Utilisateurs</h1>
-      @each(user in users)
+      <h1>Démarrer une conversation</h1>
+      @form({ route: 'dashboard', method: 'GET' })
+        <input
+          type="search"
+          name="q"
+          value="{{ q }}"
+          placeholder="Rechercher un utilisateur (nom ou e-mail)"
+          autocomplete="off"
+        />
+        @!button({ text: 'Rechercher', type: 'submit' })
+      @end
+      @if(q.length >= 2 && results.length === 0)
+        <p>Aucun utilisateur trouvé pour « {{ q }} ».</p>
+      @end
+      @each(user in results)
         @form({ route: 'conversations.store', method: 'POST' })
           <input type="hidden" name="userId" value="{{ user.id }}" />
           <span>{{ user.fullName || user.email }}</span>
@@ -12,7 +25,7 @@
 
       <h2>Mes conversations</h2>
       @if(conversationItems.length === 0)
-        <p>Aucune conversation pour l'instant. Choisis quelqu'un dans la liste des utilisateurs.</p>
+        <p><p>Aucune conversation pour l'instant. Utilise la recherche ci-dessus pour démarrer une discussion.</p></p>
       @end
       @each(item in conversationItems)
         @link({ route: 'conversations.show', routeParams: { id: item.id } })

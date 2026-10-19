@@ -4,11 +4,25 @@ import Conversation from '#models/conversation'
 import { groupValidator } from '#validators/conversation'
 
 export default class ConversationsController {
-  async index({ auth, view }: HttpContext) {
+  async index({ auth, view, request }: HttpContext) {
     const users = await User.query()
       .whereNot('id', auth.user!.id)
       .whereNotNull('emailVerifiedAt')
       .orderBy('fullName')
+
+    const q = String(request.input('q', '')).trim()
+    let results: User[] = []
+
+    if (q.length >= 2) {
+      results = await User.query()
+        .whereNot('id', auth.user!.id)
+        .whereNotNull('emailVerifiedAt')
+        .where((query) => {
+          query.whereILike('fullName', `%${q}%`).orWhereILike('email', `%${q}%`)
+        })
+        .orderBy('fullName')
+        .limit(10)
+    }
 
     const conversations = await auth
       .user!.related('conversations')
@@ -73,7 +87,13 @@ export default class ConversationsController {
       })
     }
 
-    return view.render('pages/dashboard', { users, conversationItems, me: auth.user!.id })
+    return view.render('pages/dashboard', {
+      users,
+      conversationItems,
+      me: auth.user!.id,
+      results,
+      q,
+    })
   }
   async store({ auth, request, response, session }: HttpContext) {
     const me = auth.user!
