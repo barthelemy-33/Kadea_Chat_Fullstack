@@ -1,6 +1,6 @@
 @layouts.auth()
-  <h1 class="auth__title">Create your account</h1>
-  <p class="auth__sub">Start building with the starter kit.</p>
+  <h1 class="auth__title">Crée ton compte</h1>
+  <p class="auth__sub">Rejoins Kadea Chat et commence à discuter.</p>
   @form({
     route: 'new_account.store',
     method: 'POST',
@@ -9,30 +9,31 @@
     'x-on:submit': 'submitting = true',
   })
     @field.root({ name: 'fullName' })
-      @!field.label({ text: 'Full name' })
-      @!input.control({ autocomplete: 'name', placeholder: 'Ada Lovelace' })
+      @!field.label({ text: 'Nom complet' })
+      @!input.control({ autocomplete: 'name', placeholder: 'Ex : Marie Kabongo' })
       @!field.error()
     @end
     @field.root({ name: 'email' })
-      @!field.label({ text: 'Email' })
+      @!field.label({ text: 'Adresse e-mail' })
       @!input.control({
         type: 'email',
         autocomplete: 'email',
-        placeholder: 'you@example.com',
+        placeholder: 'toi@exemple.com',
       })
       @!field.error()
     @end
     @field.root({ name: 'password' })
-      @!field.label({ text: 'Password' })
+      @!field.label({ text: 'Mot de passe' })
       @!input.control({
         type: 'password',
         autocomplete: 'new-password',
         placeholder: '••••••••',
       })
+      <small style="color: var(--muted); font-size: 12.5px;">Entre 8 et 32 caractères.</small>
       @!field.error()
     @end
     @field.root({ name: 'passwordConfirmation' })
-      @!field.label({ text: 'Confirm password' })
+      @!field.label({ text: 'Confirme le mot de passe' })
       @!input.control({
         type: 'password',
         autocomplete: 'new-password',
@@ -41,21 +42,21 @@
       @!field.error()
     @end
     @!button({
-      text: 'Create account',
+      text: 'Créer mon compte',
       type: 'submit',
       block: true,
       style: 'margin-top: 4px;',
       'x-bind:disabled': 'submitting',
-      'x-text': "submitting ? 'One moment…' : 'Create account'",
+      'x-text': "submitting ? 'Création…' : 'Créer mon compte'",
     })
   @end
 
   <p class="auth__foot">
     
-    Already have an account?
+    Tu as déjà un compte ?
 
     @link({ route: 'session.create', class: 'il' })
-      Sign in
+      Se connecter
     @end
   </p>
 @end

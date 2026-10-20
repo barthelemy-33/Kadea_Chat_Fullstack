@@ -1,0 +1,107 @@
+/* =========================================================
+   Kadea Chat : pages d'authentification
+   ========================================================= */
+
+/* Logo dans la colonne du formulaire */
+.kc-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.kc-brand__mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  background: var(--btn);
+  color: var(--btn-fg);
+}
+.kc-brand__name {
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+/* Panneau visuel (toujours sombre, quel que soit le thème) */
+.auth__aside.kc-aside {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 32px;
+  padding: 32px 40px;
+  color: #eaf0ff;
+  background:
+    radial-gradient(900px 520px at 90% -10%, rgba(122, 162, 255, 0.35), transparent 60%),
+    radial-gradient(700px 520px at 0% 110%, rgba(30, 58, 138, 0.65), transparent 60%),
+    linear-gradient(160deg, #0a1330 0%, #0d1b44 55%, #132a66 100%);
+
+  /* Le bouton de thème s'adapte à ce fond sombre */
+  --card: rgba(255, 255, 255, 0.08);
+  --line: rgba(255, 255, 255, 0.16);
+  --line-2: rgba(255, 255, 255, 0.24);
+  --ink: #eaf0ff;
+  --muted: #b6c3e4;
+}
+.kc-art {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+}
+.kc-aside__top {
+  display: flex;
+  justify-content: flex-end;
+}
+.kc-hero {
+  max-width: 460px;
+}
+.kc-hero__title {
+  font-size: clamp(26px, 3vw, 36px);
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+}
+.kc-hero__text {
+  margin-top: 14px;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #c7d3f0;
+}
+.kc-points {
+  list-style: none;
+  margin-top: 28px;
+  display: grid;
+  gap: 14px;
+}
+.kc-points li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+  color: #eaf0ff;
+}
+.kc-points svg {
+  flex: none;
+  padding: 7px;
+  box-sizing: content-box;
+  width: 18px;
+  height: 18px;
+  border-radius: 10px;
+  background: rgba(122, 162, 255, 0.18);
+  color: #a9c0ff;
+}
+.kc-foot {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: #8ea0cc;
+}

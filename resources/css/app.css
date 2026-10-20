@@ -2,45 +2,72 @@
    AdonisJS Starter Kit
    Tokens are the only thing you need to touch to re-theme.
    ========================================================================== */
+@import '@fontsource-variable/plus-jakarta-sans';
 
 :root {
-  --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --sans:
+    'Plus Jakarta Sans Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
+    Arial, sans-serif;
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
-  --serif: ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+  --serif:
+    'Plus Jakarta Sans Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
+    Arial, sans-serif;
 
-  --paper: #f5f5f6;
+  /* Fond et texte : un blanc légèrement bleuté */
+  --paper: #f2f4f9;
   --card: #ffffff;
-  --ink: #0a0a0b;
-  --ink-2: #2a2c30;
-  --muted: #6b6f76;
-  --subtle: #a4a8af;
-  --line: #ededee;
-  --line-2: #dddfe2;
-  --btn: #0a0a0b;
+  --ink: #0f172a;
+  --ink-2: #2b3650;
+  --muted: #55627a;
+  --subtle: #93a0b8;
+  --line: #e2e7f0;
+  --line-2: #d0d8e6;
+
+  /* Boutons et champs */
+  --btn: #1e3a8a;
   --btn-fg: #ffffff;
-  --ring: rgba(10, 10, 11, 0.13);
+  --ring: rgba(30, 58, 138, 0.28);
   --field: #ffffff;
   --ok: #18794e;
 
-  --r: 8px;
-  --r-lg: 14px;
+  /* Identité Kadea Chat */
+  --brand: #1e3a8a;
+  --brand-strong: #172e6e;
+  --brand-soft: #dfe7fb;
+  --bubble-in: #ffffff;
+  --bubble-out: #dfe7fb;
+  --bubble-ink: #0f172a;
+  --danger: #b42318;
+
+  --r: 10px;
+  --r-lg: 16px;
   color-scheme: light;
 }
 
 :root[data-theme='dark'] {
-  --paper: #08080a;
-  --card: #111114;
-  --ink: #ededee;
-  --ink-2: #c4c6ca;
-  --muted: #8b8f97;
-  --subtle: #585c64;
-  --line: #1e1f23;
-  --line-2: #2c2e33;
-  --btn: #ededee;
-  --btn-fg: #0a0a0b;
-  --ring: rgba(237, 237, 238, 0.14);
-  --field: #0c0c0f;
+  --paper: #0a1020;
+  --card: #101a2e;
+  --ink: #e6ebf7;
+  --ink-2: #c0c9de;
+  --muted: #8896b3;
+  --subtle: #55627f;
+  --line: #1a2540;
+  --line-2: #263459;
+
+  --btn: #7aa2ff;
+  --btn-fg: #0a1630;
+  --ring: rgba(122, 162, 255, 0.32);
+  --field: #0c1426;
   --ok: #3ecf8e;
+
+  --brand: #7aa2ff;
+  --brand-strong: #a3bdff;
+  --brand-soft: #172a55;
+  --bubble-in: #17233b;
+  --bubble-out: #1f3a78;
+  --bubble-ink: #e6ebf7;
+  --danger: #f97066;
+
   color-scheme: dark;
 }
 
