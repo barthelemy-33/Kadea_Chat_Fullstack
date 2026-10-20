@@ -18,12 +18,17 @@
   <body>
     <div class="auth">
       <div class="auth__form-col">
-        <a href="/" class="kc-brand">
-          <span class="kc-brand__mark">
-            @svg('lucide:message-circle', { width: 18, height: 18 })
-          </span>
-          <span class="kc-brand__name">Kadea Chat</span>
-        </a>
+        <div class="kc-topbar">
+          <a href="/" class="kc-brand">
+            <span class="kc-brand__mark">
+              @svg('lucide:message-circle', { width: 18, height: 18 })
+            </span>
+            <span class="kc-brand__name">Kadea Chat</span>
+          </a>
+          <div class="kc-topbar__toggle">
+            @!themeToggle()
+          </div>
+        </div>
         <div class="auth__form-wrap">{{{ await $slots.main() }}}</div>
         <div style="height: 20px;"></div>
       </div>
@@ -47,7 +52,11 @@
               
               
               
+              
+              
               Messages en privé 
+
+
 
 
 
@@ -59,7 +68,11 @@
               
               
               
+              
+              
               Messages en groupe
+
+
 
 
 
@@ -71,7 +84,11 @@
               
               
               
+              
+              
               Sécurité 
+
+
 
 
 

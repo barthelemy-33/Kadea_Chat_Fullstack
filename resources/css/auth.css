@@ -105,3 +105,36 @@
   text-transform: uppercase;
   color: #8ea0cc;
 }
+/* Barre du haut dans la colonne du formulaire */
+.kc-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.kc-topbar__toggle {
+  display: none;
+}
+
+/* Téléphones et petites tablettes : le formulaire seul */
+@media (max-width: 900px) {
+  .auth {
+    display: block;
+    height: auto;
+    min-height: 100dvh;
+  }
+  .auth__aside.kc-aside {
+    display: none;
+  }
+  .auth__form-col {
+    width: 100%;
+    min-height: 100dvh;
+  }
+  .kc-topbar__toggle {
+    display: block;
+  }
+  /* Évite le zoom automatique de l'iPhone quand on touche un champ */
+  .auth input {
+    font-size: 16px;
+  }
+}
