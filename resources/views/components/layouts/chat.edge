@@ -1,0 +1,174 @@
+@let(mode = $props.get('mode') || 'list')
+@let(items = $props.get('conversationItems') || [])
+@let(results = $props.get('results') || [])
+@let(q = $props.get('q') || '')
+@let(activeId = $props.get('activeId'))
+<!DOCTYPE html>
+<html
+  lang="fr"
+  data-theme="{{
+    request.plainCookie('app_theme', {
+      defaultValue: 'light',
+      encoded: false,
+    })
+  }}"
+>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>
+      {{
+        $props.get('title')
+          ? $props.get('title') + ' · Kadea Chat'
+          : 'Kadea Chat'
+      }}
+    </title>
+    @vite([
+      'resources/css/app.css',
+      'resources/css/auth.css',
+      'resources/css/messagerie.css',
+      'resources/css/barre_nav.css',
+      'resources/js/app.js',
+    ])
+    @stack('dumper')
+  </head>
+  <body>
+    <div class="kc-app kc-app--{{ mode }}">
+      <aside class="kc-sidebar">
+        <header class="kc-sidebar__head">
+          <a href="/dashboard" class="kc-brand">
+            <span class="kc-brand__mark">
+              @svg('lucide:message-circle', { width: 18, height: 18 })
+            </span>
+            <span class="kc-brand__name">Kadea Chat</span>
+          </a>
+          <div class="kc-sidebar__actions">
+            <a
+              href="/users"
+              class="kc-icon-btn kc-hide-mobile"
+              title="Nouvelle discussion"
+              aria-label="Nouvelle discussion"
+            >
+              @svg('lucide:message-square-plus', { width: 19, height: 19 })
+            </a>
+            <a
+              href="/groups/new"
+              class="kc-icon-btn kc-hide-mobile"
+              title="Nouveau groupe"
+              aria-label="Nouveau groupe"
+            >
+              @svg('lucide:users', { width: 19, height: 19 })
+            </a>
+            <a
+              href="/profile"
+              class="kc-icon-btn kc-hide-mobile"
+              title="Mon profil"
+              aria-label="Mon profil"
+            >
+              @svg('lucide:user', { width: 19, height: 19 })
+            </a>
+            @!themeToggle()
+            @form({ route: 'session.destroy', method: 'POST', class: 'kc-inline' })
+              <button
+                type="submit"
+                class="kc-icon-btn"
+                title="Se déconnecter"
+                aria-label="Se déconnecter"
+              >
+                @svg('lucide:log-out', { width: 19, height: 19 })
+              </button>
+            @end
+          </div>
+        </header>
+        @form({ route: 'dashboard', method: 'GET', class: 'kc-search' })
+          <input
+            type="search"
+            name="q"
+            value="{{ q }}"
+            placeholder="Rechercher un utilisateur"
+            autocomplete="off"
+          />
+        @end
+
+        <nav class="kc-list">
+          @if(q.length >= 2)
+            <div class="kc-section-title">Résultats</div>
+            @if(results.length === 0)
+              <p class="kc-note">Aucun utilisateur trouvé pour « {{ q }} ».</p>
+            @end
+            @each(user in results)
+              @form({ route: 'conversations.store', method: 'POST', class: 'kc-row' })
+                <input type="hidden" name="userId" value="{{ user.id }}" />
+                @if(user.avatarUrl)
+                  <img class="kc-avatar" src="{{ user.avatarUrl }}" alt="" />
+                @else
+                  <span class="kc-avatar">{{ user.initials }}</span>
+                @end
+
+                <div class="kc-row__body">
+                  <div class="kc-row__title">{{ user.fullName || user.email }}</div>
+                </div>
+                <button type="submit" class="kc-btn kc-btn--small">Discuter</button>
+              @end
+            @end
+
+            <div class="kc-section-title">Conversations</div>
+          @end
+          @each(item in items)
+            <a
+              href="/conversations/{{ item.id }}"
+              class="kc-row {{ item.id === activeId ? 'kc-row--active' : '' }}"
+            >
+              @if(item.avatarUrl)
+                <img class="kc-avatar" src="{{ item.avatarUrl }}" alt="" />
+              @else
+                <span class="kc-avatar">{{ item.initials }}</span>
+              @end
+
+              <div class="kc-row__body">
+                <div class="kc-row__top">
+                  <span class="kc-row__title">{{ item.title }}</span>
+                  <span class="kc-row__date">{{ item.date }}</span>
+                </div>
+                <div class="kc-row__preview">{{ item.preview }}</div>
+              </div>
+            </a>
+          @end
+          @if(items.length === 0 && q.length < 2)
+            <p class="kc-note">
+              Aucune conversation pour l'instant. Appuie sur le bouton pour en démarrer une.
+            </p>
+          @end
+        </nav>
+      </aside>
+
+      <main class="kc-main">{{{ await $slots.main() }}}</main>
+    </div>
+    @if(mode === 'list')
+      <a href="/users" class="kc-fab" aria-label="Nouvelle discussion">
+        @svg('lucide:message-square-plus', { width: 26, height: 26 })
+      </a>
+      <nav class="kc-tabbar" aria-label="Navigation principale">
+        <a href="/dashboard" class="kc-tab kc-tab--active">
+          <span class="kc-tab__icon">
+            @svg('lucide:message-circle', { width: 22, height: 22 })
+          </span>
+          <span class="kc-tab__label">Discussions</span>
+        </a>
+        <a href="/groups/new" class="kc-tab">
+          <span class="kc-tab__icon">
+            @svg('lucide:users', { width: 22, height: 22 })
+          </span>
+          <span class="kc-tab__label">Groupe</span>
+        </a>
+        <a href="/profile" class="kc-tab">
+          <span class="kc-tab__icon">
+            @svg('lucide:user', { width: 22, height: 22 })
+          </span>
+          <span class="kc-tab__label">Profil</span>
+        </a>
+      </nav>
+    @end
+    @include('partials/flash_alerts')
+  </body>
+</html>

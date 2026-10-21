@@ -1,0 +1,42 @@
+@layouts.chat({ mode: 'chat', conversationItems, title: 'Nouvelle discussion' })
+  <div class="kc-page">
+    <a href="/dashboard" class="kc-back">
+      @svg('lucide:arrow-left', { width: 20, height: 20 })
+      
+      Retour
+
+    </a>
+    <h1 class="kc-h1">Nouvelle discussion</h1>
+    <p class="kc-lead">Choisis quelqu'un pour démarrer une conversation privée.</p>
+    @form({ route: 'users.index', method: 'GET', class: 'kc-search kc-search--page' })
+      <input
+        type="search"
+        name="q"
+        value="{{ q }}"
+        placeholder="Filtrer par nom"
+        autocomplete="off"
+      />
+    @end
+
+    <div class="kc-users">
+      @each(user in users)
+        @form({ route: 'conversations.store', method: 'POST', class: 'kc-row' })
+          <input type="hidden" name="userId" value="{{ user.id }}" />
+          @if(user.avatarUrl)
+            <img class="kc-avatar" src="{{ user.avatarUrl }}" alt="" />
+          @else
+            <span class="kc-avatar">{{ user.initials }}</span>
+          @end
+
+          <div class="kc-row__body">
+            <div class="kc-row__title">{{ user.fullName || 'Utilisateur' }}</div>
+          </div>
+          <button type="submit" class="kc-btn kc-btn--small">Discuter</button>
+        @end
+      @end
+      @if(users.length === 0)
+        <p class="kc-note">Aucun utilisateur trouvé.</p>
+      @end
+    </div>
+  </div>
+@end

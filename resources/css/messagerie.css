@@ -1,0 +1,363 @@
+/* =========================================================
+   Kadea Chat : application (messagerie)
+   ========================================================= */
+.kc-app {
+  display: grid;
+  grid-template-columns: minmax(300px, 380px) 1fr;
+  height: 100vh;
+  height: 100dvh;
+  background: var(--paper);
+}
+.kc-sidebar {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--card);
+  border-right: 1px solid var(--line);
+}
+.kc-sidebar__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 14px 14px 10px 16px;
+}
+.kc-sidebar__actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.kc-inline {
+  display: inline-flex;
+}
+.kc-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  color: var(--ink-2);
+}
+.kc-icon-btn:hover {
+  background: var(--paper);
+}
+.kc-search {
+  padding: 4px 16px 12px;
+}
+.kc-search input {
+  width: 100%;
+  height: 42px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid var(--line-2);
+  background: var(--field);
+  color: var(--ink);
+  font-size: 15px;
+}
+.kc-search input:focus {
+  outline: 2px solid var(--ring);
+  border-color: var(--brand);
+}
+.kc-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 4px 8px 16px;
+}
+.kc-section-title {
+  padding: 12px 12px 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.kc-note {
+  padding: 12px 14px;
+  font-size: 14px;
+  color: var(--muted);
+}
+.kc-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  min-height: 64px;
+}
+.kc-row:hover {
+  background: var(--paper);
+}
+.kc-row--active,
+.kc-row--active:hover {
+  background: var(--brand-soft);
+}
+.kc-row__body {
+  min-width: 0;
+  flex: 1;
+}
+.kc-row__top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.kc-row__title {
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.kc-row__date {
+  flex: none;
+  font-size: 12px;
+  color: var(--muted);
+}
+.kc-row__preview {
+  font-size: 13.5px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.kc-avatar {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--brand-soft);
+  color: var(--brand);
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.kc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  padding: 0 20px;
+  border-radius: 12px;
+  background: var(--btn);
+  color: var(--btn-fg);
+  font-weight: 600;
+}
+.kc-btn--small {
+  height: 34px;
+  padding: 0 14px;
+  font-size: 13.5px;
+}
+
+.kc-main {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.kc-empty {
+  margin: auto;
+  max-width: 420px;
+  padding: 24px;
+  text-align: center;
+  display: grid;
+  gap: 14px;
+  justify-items: center;
+}
+.kc-empty__mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 22px;
+  background: var(--brand-soft);
+  color: var(--brand);
+}
+.kc-empty h1 {
+  font-size: 26px;
+  letter-spacing: -0.02em;
+}
+.kc-empty p {
+  color: var(--muted);
+}
+
+.kc-page {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 24px;
+  overflow-y: auto;
+}
+.kc-h1 {
+  font-size: 26px;
+  letter-spacing: -0.02em;
+}
+.kc-lead {
+  margin: 6px 0 22px;
+  color: var(--muted);
+}
+.kc-back {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 14px;
+  color: var(--brand);
+  font-weight: 600;
+}
+.kc-pick {
+  display: grid;
+  gap: 2px;
+  max-height: 340px;
+  overflow-y: auto;
+  padding: 6px;
+  border: 1px solid var(--line-2);
+  border-radius: 14px;
+  background: var(--field);
+}
+.kc-row--pick {
+  cursor: pointer;
+}
+.kc-row--pick input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--brand);
+}
+
+/* Téléphone : une seule colonne à la fois */
+@media (max-width: 900px) {
+  .kc-app {
+    grid-template-columns: 1fr;
+  }
+  .kc-app--list .kc-main {
+    display: none;
+  }
+  .kc-app--chat .kc-sidebar {
+    display: none;
+  }
+  .kc-back {
+    display: inline-flex;
+  }
+  .kc-search input {
+    font-size: 16px;
+  }
+}
+/* =========================================================
+   Kadea Chat : barre du bas, bouton d'action, boutons secondaires
+   ========================================================= */
+:root {
+  /* Couleur du bouton rond. Pour du vert : --fab: #1faa59; */
+  --fab: var(--btn);
+  --fab-fg: var(--btn-fg);
+}
+
+.kc-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 6px;
+}
+.kc-btn--ghost {
+  background: transparent;
+  color: var(--brand);
+  border: 1.5px solid var(--line-2);
+}
+.kc-btn--ghost:hover {
+  background: var(--brand-soft);
+}
+.kc-search--page {
+  padding: 0 0 14px;
+}
+.kc-users {
+  display: grid;
+  gap: 2px;
+}
+
+/* Masqué sur ordinateur */
+.kc-fab,
+.kc-tabbar {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .kc-hide-mobile {
+    display: none;
+  }
+
+  /* La liste ne doit pas passer sous la barre du bas */
+  .kc-app--list .kc-list {
+    padding-bottom: 180px;
+  }
+
+  /* Barre flottante, arrondie et décollée des bords */
+  .kc-tabbar {
+    position: fixed;
+    left: 14px;
+    right: 14px;
+    bottom: calc(14px + env(safe-area-inset-bottom));
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    gap: 4px;
+    height: 68px;
+    padding: 0 10px;
+    border-radius: 26px;
+    background: var(--card);
+    background: color-mix(in srgb, var(--card) 90%, transparent);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--line-2);
+    box-shadow: 0 14px 36px rgba(10, 20, 50, 0.2);
+  }
+  .kc-tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    color: var(--muted);
+    font-size: 11.5px;
+    font-weight: 600;
+  }
+  .kc-tab__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 30px;
+    border-radius: 15px;
+  }
+  .kc-tab--active {
+    color: var(--brand);
+  }
+  .kc-tab--active .kc-tab__icon {
+    background: var(--brand-soft);
+  }
+
+  /* Bouton rond d'action, au-dessus de la barre */
+  .kc-fab {
+    position: fixed;
+    right: 20px;
+    bottom: calc(14px + 68px + 16px + env(safe-area-inset-bottom));
+    z-index: 31;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 20px;
+    background: var(--fab);
+    color: var(--fab-fg);
+    box-shadow: 0 12px 28px rgba(10, 20, 50, 0.28);
+  }
+  .kc-fab:active {
+    transform: scale(0.96);
+  }
+}

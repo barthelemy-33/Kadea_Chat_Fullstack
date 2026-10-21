@@ -1,15 +1,74 @@
 import type { HttpContext } from '@adonisjs/core/http'
+import { DateTime } from 'luxon'
 import User from '#models/user'
 import Conversation from '#models/conversation'
 import { groupValidator } from '#validators/conversation'
 
 export default class ConversationsController {
-  async index({ auth, view, request }: HttpContext) {
-    const users = await User.query()
-      .whereNot('id', auth.user!.id)
-      .whereNotNull('emailVerifiedAt')
-      .orderBy('fullName')
+  /**
+   * Prépare la liste des conversations affichée dans la colonne de gauche
+   */
+  private async buildItems(user: User) {
+    const conversations = await user
+      .related('conversations')
+      .query()
+      .whereNull('conversation_members.left_at')
+      .preload('members')
+      .orderByRaw('conversations.last_message_at DESC NULLS LAST')
 
+    const items = []
+
+    for (const conversation of conversations) {
+      let other: User | null = null
+      for (const member of conversation.members) {
+        if (member.id !== user.id) {
+          other = member
+        }
+      }
+
+      const lastMessage = await conversation
+        .related('messages')
+        .query()
+        .orderBy('createdAt', 'desc')
+        .first()
+
+      let title = 'Conversation'
+      let initials = '?'
+      let avatarUrl: string | null = null
+
+      if (conversation.type === 'group') {
+        title = conversation.name || 'Groupe'
+        initials = (conversation.name || 'G').slice(0, 2).toUpperCase()
+      } else if (other) {
+        title = other.fullName || other.email
+        initials = other.initials
+        avatarUrl = other.avatarUrl
+      }
+
+      let preview = 'Aucun message'
+      let date = ''
+
+      if (lastMessage) {
+        if (lastMessage.deletedAt) {
+          preview = 'Message supprimé'
+        } else {
+          preview = lastMessage.content || ''
+        }
+
+        if (lastMessage.createdAt.hasSame(DateTime.now(), 'day')) {
+          date = lastMessage.createdAt.toFormat('HH:mm')
+        } else {
+          date = lastMessage.createdAt.toFormat('dd/MM')
+        }
+      }
+
+      items.push({ id: conversation.id, title, initials, avatarUrl, preview, date })
+    }
+
+    return items
+  }
+
+  async index({ auth, view, request }: HttpContext) {
     const q = String(request.input('q', '')).trim()
     let results: User[] = []
 
@@ -24,83 +83,48 @@ export default class ConversationsController {
         .limit(10)
     }
 
-    const conversations = await auth
-      .user!.related('conversations')
-      .query()
-      .whereNull('conversation_members.left_at')
-      .preload('members')
-      .orderByRaw('conversations.last_message_at DESC NULLS LAST')
+    const conversationItems = await this.buildItems(auth.user!)
 
-    const conversationItems = []
+    return view.render('pages/dashboard', { conversationItems, results, q })
+  }
 
-    for (const conversation of conversations) {
-      // Trouver l'autre membre
-      let other: User | null = null
-      for (const member of conversation.members) {
-        if (member.id !== auth.user!.id) {
-          other = member
-        }
-      }
+  async newGroup({ auth, view }: HttpContext) {
+    const users = await User.query()
+      .whereNot('id', auth.user!.id)
+      .whereNotNull('emailVerifiedAt')
+      .orderBy('fullName')
 
-      // Chercher le dernier message
-      const lastMessage = await conversation
-        .related('messages')
-        .query()
-        .orderBy('createdAt', 'desc')
-        .first()
+    const conversationItems = await this.buildItems(auth.user!)
 
-      // Préparer le nom, les initiales et la photo
-      let title = 'Conversation'
-      let initials = '?'
-      let avatarUrl: string | null = null
+    return view.render('pages/groups/new', { users, conversationItems })
+  }
 
-      if (conversation.type === 'group') {
-        title = conversation.name || 'Groupe'
-        initials = (conversation.name || 'G').slice(0, 2).toUpperCase()
-      } else if (other) {
-        title = other.fullName || other.email
-        initials = other.initials
-        avatarUrl = other.avatarUrl
-      }
+  async directory({ auth, view, request }: HttpContext) {
+    const q = String(request.input('q', '')).trim()
 
-      // Préparer l'aperçu et la date
-      let preview = 'Aucun message'
-      let date = ''
+    const query = User.query()
+      .whereNot('id', auth.user!.id)
+      .whereNotNull('emailVerifiedAt')
+      .orderBy('fullName')
 
-      if (lastMessage) {
-        if (lastMessage.deletedAt) {
-          preview = 'Message supprimé'
-        } else {
-          preview = lastMessage.content || ''
-        }
-        date = lastMessage.createdAt.toFormat('dd/MM HH:mm')
-      }
-
-      // Ajouter l'objet à la liste
-      conversationItems.push({
-        id: conversation.id,
-        title,
-        initials,
-        avatarUrl,
-        preview,
-        date,
+    if (q.length >= 1) {
+      query.where((builder) => {
+        builder.whereILike('fullName', `%${q}%`).orWhereILike('email', `%${q}%`)
       })
     }
 
-    return view.render('pages/dashboard', {
-      users,
-      conversationItems,
-      me: auth.user!.id,
-      results,
-      q,
-    })
+    const users = await query
+    const conversationItems = await this.buildItems(auth.user!)
+
+    return view.render('pages/users', { users, conversationItems, q })
   }
+
   async store({ auth, request, response, session }: HttpContext) {
     const me = auth.user!
     const other = await User.find(request.input('userId'))
 
     if (!other || other.id === me.id) {
-      session.flash('error', 'Erreur est survenue, Veuillez réessayer')
+      session.flash('error', 'Une erreur est survenue, réessaie.')
       return response.redirect().toRoute('dashboard')
     }
 
@@ -109,6 +133,7 @@ export default class ConversationsController {
 
     return response.redirect().toRoute('conversations.show', { id: conversation.id })
   }
+
   async show({ auth, view, params, response }: HttpContext) {
     const conversation = await Conversation.findOrFail(params.id)
     if (!(await conversation.isMember(auth.user!))) {
@@ -153,6 +178,14 @@ export default class ConversationsController {
       .orderBy('fullName')
 
     const isAdmin = await conversation.isAdmin(auth.user!)
+    const conversationItems = await this.buildItems(auth.user!)
+
+    let current = null
+    for (const item of conversationItems) {
+      if (item.id === conversation.id) {
+        current = item
+      }
+    }
 
     return view.render('pages/conversations/show', {
       conversation,
@@ -162,6 +195,8 @@ export default class ConversationsController {
       memberItems,
       isAdmin,
       candidates,
+      conversationItems,
+      current,
     })
   }
 

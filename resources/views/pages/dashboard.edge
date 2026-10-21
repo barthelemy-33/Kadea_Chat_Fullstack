@@ -1,71 +1,13 @@
-@layouts.app({ title: 'Dashboard' })
-  @page()
-    <div x-data="dashboardLive('users/{{ me }}', '{{ csrfToken }}')">
-      <h1>Démarrer une conversation</h1>
-      @form({ route: 'dashboard', method: 'GET' })
-        <input
-          type="search"
-          name="q"
-          value="{{ q }}"
-          placeholder="Rechercher un utilisateur (nom ou e-mail)"
-          autocomplete="off"
-        />
-        @!button({ text: 'Rechercher', type: 'submit' })
-      @end
-      @if(q.length >= 2 && results.length === 0)
-        <p>Aucun utilisateur trouvé pour « {{ q }} ».</p>
-      @end
-      @each(user in results)
-        @form({ route: 'conversations.store', method: 'POST' })
-          <input type="hidden" name="userId" value="{{ user.id }}" />
-          <span>{{ user.fullName || user.email }}</span>
-          @!button({ text: 'Discuter', type: 'submit' })
-        @end
-      @end
-
-      <h2>Mes conversations</h2>
-      @if(conversationItems.length === 0)
-        <p><p>Aucune conversation pour l'instant. Utilise la recherche ci-dessus pour démarrer une discussion.</p></p>
-      @end
-      @each(item in conversationItems)
-        @link({ route: 'conversations.show', routeParams: { id: item.id } })
-          @if(item.avatarUrl)
-            <img
-              src="{{ item.avatarUrl }}"
-              alt=""
-              style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;"
-            />
-          @else
-            <span
-              style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: #0f766e; color: #fff; font-size: 14px;"
-            >
-              {{ item.initials }}
-            </span>
-          @end
-
-          <strong>{{ item.title }}</strong>
-          <small>{{ item.date }}</small>
-          <p>{{ item.preview }}</p>
-        @end
-      @end
-
-      <h2>Créer un groupe</h2>
-      @form({ route: 'groups.store', method: 'POST' })
-        @field.root({ name: 'name' })
-          @!field.label({ text: 'Nom du groupe' })
-          @!input.control({ type: 'text', placeholder: 'Ex : Team Foot' })
-          @!field.error()
-        @end
-
-        <p>Choisis les membres :</p>
-        @each(user in users)
-          <label>
-            <input type="checkbox" name="memberIds[]" value="{{ user.id }}" />
-            {{ user.fullName || user.email }}
-          </label>
-        @end
-        @!button({ text: 'Créer le groupe', type: 'submit' })
-      @end
+@layouts.chat({ mode: 'list', conversationItems, results, q, title: 'Conversations' })
+  <div class="kc-empty">
+    <div class="kc-empty__mark">
+      @svg('lucide:message-circle', { width: 30, height: 30 })
     </div>
-  @end
+    <h1>Kadea Chat</h1>
+    <p>Choisis une conversation à gauche, ou démarre une nouvelle discussion.</p>
+    <div class="kc-actions">
+      <a href="/users" class="kc-btn">Nouvelle discussion</a>
+      <a href="/groups/new" class="kc-btn kc-btn--ghost">Créer un groupe</a>
+    </div>
+  </div>
 @end

@@ -1,0 +1,42 @@
+@layouts.chat({ mode: 'chat', conversationItems, title: 'Nouveau groupe' })
+  <div class="kc-page">
+    <a href="/dashboard" class="kc-back">
+      @svg('lucide:arrow-left', { width: 20, height: 20 })
+      
+      
+      Retour
+
+
+    </a>
+    <h1 class="kc-h1">Nouveau groupe</h1>
+    <p class="kc-lead">
+      Donne un nom au groupe et choisis ses membres. Tu en seras l'administrateur.
+    </p>
+    @form({ route: 'groups.store', method: 'POST' })
+      @field.root({ name: 'name' })
+        @!field.label({ text: 'Nom du groupe' })
+        @!input.control({ type: 'text', placeholder: 'Ex : Team Foot' })
+        @!field.error()
+      @end
+      @field.root({ name: 'memberIds' })
+        @!field.label({ text: 'Membres' })
+        <div>
+          @each(user in users)
+            <label class="kc-row kc-row--pick">
+              <input type="checkbox" name="memberIds[]" value="{{ user.id }}" />
+              @if(user.avatarUrl)
+                <img class="kc-avatar" src="{{ user.avatarUrl }}" alt="" />
+              @else
+                <span class="kc-avatar">{{ user.initials }}</span>
+              @end
+
+              <span class="kc-row__title">{{ user.fullName || user.email }}</span>
+            </label>
+          @end
+        </div>
+        @!field.error()
+      @end
+      @!button({ text: 'Créer le groupe', type: 'submit', block: true })
+    @end
+  </div>
+@end
