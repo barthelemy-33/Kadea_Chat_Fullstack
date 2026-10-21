@@ -3,10 +3,12 @@ import type { HttpContext } from '@adonisjs/core/http'
 import hash from '@adonisjs/core/services/hash'
 import { avatarValidator } from '#validators/user'
 import cloudinary from '#services/cloudinary'
+import { buildConversationItems } from '#services/conversation_list'
 
 export default class ProfileController {
   async show({ auth, view }: HttpContext) {
-    return view.render('pages/profil/profil', { user: auth.user! })
+    const conversationItems = await buildConversationItems(auth.user!)
+    return view.render('pages/profil/profil', { user: auth.user!, conversationItems })
   }
 
   async updateName({ auth, request, response, session }: HttpContext) {

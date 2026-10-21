@@ -1,57 +1,62 @@
-@layouts.app({ title: 'Mon profil' })
-  @page()
-    <h1>Mon profil</h1>
-    <h2>Ma photo</h2>
-    @if(user.avatarUrl)
-      <img
-        src="{{ user.avatarUrl }}"
-        alt="Ma photo de profil"
-        width="96"
-        height="96"
-        style="border-radius: 50%; object-fit: cover;"
-      />
-    @else
-      <p>Tu n'as pas encore de photo.</p>
-    @end
-    @form({ route: 'profile.avatar', method: 'POST', enctype: 'multipart/form-data' })
-      @field.root({ name: 'avatar' })
-        @!field.label({ text: 'Choisir une image (JPG, PNG ou WebP, 2 Mo maximum)' })
-        <input type="file" name="avatar" accept="image/jpeg,image/png,image/webp" />
-        @!field.error()
+@layouts.chat({ mode: 'chat', tab: 'profile', conversationItems, title: 'Mon profil' })
+  <div class="kc-page">
+    <div class="kc-profile__hero">
+      @if(user.avatarUrl)
+        <img class="kc-avatar kc-avatar--xl" src="{{ user.avatarUrl }}" alt="Ma photo de profil" />
+      @else
+        <span class="kc-avatar kc-avatar--xl">{{ user.initials }}</span>
       @end
-      @!button({ text: 'Enregistrer la photo', type: 'submit' })
-    @end
 
-    <p>Adresse e-mail : {{ user.email }}</p>
+      <div>
+        <h1 class="kc-h1">{{ user.fullName || 'Mon profil' }}</h1>
+        <p class="kc-lead kc-lead--tight">{{ user.email }}</p>
+      </div>
+    </div>
 
-    <h2>Mon nom</h2>
-    @form({ route: 'profile.name', method: 'POST' })
-      @field.root({ name: 'fullName' })
-        @!field.label({ text: 'Nom complet' })
-        <input type="text" name="fullName" value="{{ user.fullName || '' }}" />
-        @!field.error()
+    <section class="kc-card">
+      <h2>Photo de profil</h2>
+      @form({ route: 'profile.avatar', method: 'POST', enctype: 'multipart/form-data' })
+        @field.root({ name: 'avatar' })
+          @!field.label({ text: 'Choisis une image (JPG, PNG ou WebP, 2 Mo maximum)' })
+          <input type="file" name="avatar" accept="image/jpeg,image/png,image/webp" />
+          @!field.error()
+        @end
+        @!button({ text: 'Enregistrer la photo', type: 'submit' })
       @end
-      @!button({ text: 'Enregistrer le nom', type: 'submit' })
-    @end
+    </section>
 
-    <h2>Mon mot de passe</h2>
-    @form({ route: 'profile.password', method: 'POST' })
-      @field.root({ name: 'currentPassword' })
-        @!field.label({ text: 'Mot de passe actuel' })
-        @!input.control({ type: 'password', autocomplete: 'current-password' })
-        @!field.error()
+    <section class="kc-card">
+      <h2>Nom</h2>
+      @form({ route: 'profile.name', method: 'POST' })
+        @field.root({ name: 'fullName' })
+          @!field.label({ text: 'Nom complet' })
+          <input type="text" name="fullName" value="{{ user.fullName || '' }}" />
+          @!field.error()
+        @end
+        @!button({ text: 'Enregistrer le nom', type: 'submit' })
       @end
-      @field.root({ name: 'password' })
-        @!field.label({ text: 'Nouveau mot de passe' })
-        @!input.control({ type: 'password', autocomplete: 'new-password' })
-        @!field.error()
+    </section>
+
+    <section class="kc-card">
+      <h2>Mot de passe</h2>
+      @form({ route: 'profile.password', method: 'POST' })
+        @field.root({ name: 'currentPassword' })
+          @!field.label({ text: 'Mot de passe actuel' })
+          @!input.control({ type: 'password', autocomplete: 'current-password' })
+          @!field.error()
+        @end
+        @field.root({ name: 'password' })
+          @!field.label({ text: 'Nouveau mot de passe' })
+          @!input.control({ type: 'password', autocomplete: 'new-password' })
+          @!field.error()
+        @end
+        @field.root({ name: 'passwordConfirmation' })
+          @!field.label({ text: 'Confirme le nouveau mot de passe' })
+          @!input.control({ type: 'password', autocomplete: 'new-password' })
+          @!field.error()
+        @end
+        @!button({ text: 'Changer le mot de passe', type: 'submit' })
       @end
-      @field.root({ name: 'passwordConfirmation' })
-        @!field.label({ text: 'Confirme le nouveau mot de passe' })
-        @!input.control({ type: 'password', autocomplete: 'new-password' })
-        @!field.error()
-      @end
-      @!button({ text: 'Changer le mot de passe', type: 'submit' })
-    @end
-  @end
+    </section>
+  </div>
 @end

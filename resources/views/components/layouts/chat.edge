@@ -1,3 +1,4 @@
+@let(tab = $props.get('tab'))
 @let(mode = $props.get('mode') || 'list')
 @let(items = $props.get('conversationItems') || [])
 @let(results = $props.get('results') || [])
@@ -27,13 +28,12 @@
       'resources/css/app.css',
       'resources/css/auth.css',
       'resources/css/messagerie.css',
-      'resources/css/barre_nav.css',
       'resources/js/app.js',
     ])
     @stack('dumper')
   </head>
   <body>
-    <div class="kc-app kc-app--{{ mode }}">
+    <div class="kc-app kc-app--{{ mode }} {{ tab ? 'kc-app--tabs' : '' }}">
       <aside class="kc-sidebar">
         <header class="kc-sidebar__head">
           <a href="/dashboard" class="kc-brand">
@@ -148,20 +148,22 @@
       <a href="/users" class="kc-fab" aria-label="Nouvelle discussion">
         @svg('lucide:message-square-plus', { width: 26, height: 26 })
       </a>
+    @end
+    @if(tab)
       <nav class="kc-tabbar" aria-label="Navigation principale">
-        <a href="/dashboard" class="kc-tab kc-tab--active">
+        <a href="/dashboard" class="kc-tab {{ tab === 'chats' ? 'kc-tab--active' : '' }}">
           <span class="kc-tab__icon">
             @svg('lucide:message-circle', { width: 22, height: 22 })
           </span>
           <span class="kc-tab__label">Discussions</span>
         </a>
-        <a href="/groups/new" class="kc-tab">
+        <a href="/groups/new" class="kc-tab {{ tab === 'groups' ? 'kc-tab--active' : '' }}">
           <span class="kc-tab__icon">
             @svg('lucide:users', { width: 22, height: 22 })
           </span>
           <span class="kc-tab__label">Groupe</span>
         </a>
-        <a href="/profile" class="kc-tab">
+        <a href="/profile" class="kc-tab {{ tab === 'profile' ? 'kc-tab--active' : '' }}">
           <span class="kc-tab__icon">
             @svg('lucide:user', { width: 22, height: 22 })
           </span>

@@ -361,3 +361,37 @@
     transform: scale(0.96);
   }
 }
+
+/* Profil */
+.kc-avatar--xl {
+  width: 84px;
+  height: 84px;
+  font-size: 26px;
+}
+.kc-profile__hero {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.kc-lead--tight {
+  margin: 2px 0 0;
+}
+.kc-card {
+  padding: 18px;
+  margin-bottom: 16px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+}
+.kc-card h2 {
+  margin-bottom: 12px;
+  font-size: 16px;
+}
+
+/* Les pages ne doivent pas finir sous la barre du bas */
+@media (max-width: 900px) {
+  .kc-app--tabs .kc-page {
+    padding-bottom: 130px;
+  }
+}

@@ -1,9 +1,18 @@
-@layouts.chat({ mode: 'chat', conversationItems, title: 'Nouvelle discussion' })
+@layouts.chat({
+  mode: 'chat',
+  tab: 'chats',
+  conversationItems,
+  title: 'Nouvelle discussion',
+})
   <div class="kc-page">
     <a href="/dashboard" class="kc-back">
       @svg('lucide:arrow-left', { width: 20, height: 20 })
       
+      
+      
       Retour
+
+
 
     </a>
     <h1 class="kc-h1">Nouvelle discussion</h1>
