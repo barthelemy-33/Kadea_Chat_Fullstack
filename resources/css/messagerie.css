@@ -395,3 +395,35 @@
     padding-bottom: 130px;
   }
 }
+/* Messages non lus */
+.kc-row__bottom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.kc-row__bottom .kc-row__preview {
+  flex: 1;
+  min-width: 0;
+}
+.kc-row__date--unread {
+  color: var(--brand);
+  font-weight: 700;
+}
+.kc-row__preview--unread {
+  color: var(--ink);
+  font-weight: 600;
+}
+.kc-unread {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--btn);
+  color: var(--btn-fg);
+  font-size: 12px;
+  font-weight: 700;
+}

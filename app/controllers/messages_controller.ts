@@ -36,6 +36,7 @@ export default class MessagesController {
     transmit.broadcast(`conversations/${conversation.id}/messages`, {
       type: 'new',
       id: message.id,
+      senderId: auth.user!.id,
       content: message.content,
       senderName: auth.user!.fullName || auth.user!.email,
       time: message.createdAt.toFormat('HH:mm'),
@@ -62,6 +63,7 @@ export default class MessagesController {
       id: message.id,
       deletedAt: deletedAt.toFormat('dd/MM à HH:mm'),
     })
+    await conversation.notifyMembers(auth.user!.id)
 
     return response.redirect().toRoute('conversations.show', { id: message.conversationId })
   }
@@ -90,6 +92,7 @@ export default class MessagesController {
       id: message.id,
       content: message.content,
     })
+    await conversation.notifyMembers(auth.user!.id)
 
     return response.redirect().toRoute('conversations.show', { id: conversation.id })
   }

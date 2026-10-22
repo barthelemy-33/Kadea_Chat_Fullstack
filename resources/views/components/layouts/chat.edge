@@ -1,3 +1,4 @@
+@let(userId = auth && auth.user ? auth.user.id : 0)
 @let(tab = $props.get('tab'))
 @let(mode = $props.get('mode') || 'list')
 @let(items = $props.get('conversationItems') || [])
@@ -28,12 +29,16 @@
       'resources/css/app.css',
       'resources/css/auth.css',
       'resources/css/messagerie.css',
+      'resources/css/discussion.css',
       'resources/js/app.js',
     ])
     @stack('dumper')
   </head>
   <body>
-    <div class="kc-app kc-app--{{ mode }} {{ tab ? 'kc-app--tabs' : '' }}">
+    <div
+      class="kc-app kc-app--{{ mode }} {{ tab ? 'kc-app--tabs' : '' }}"
+      x-data="sidebarLive({{ userId }}, '{{ csrfToken }}')"
+    >
       <aside class="kc-sidebar">
         <header class="kc-sidebar__head">
           <a href="/dashboard" class="kc-brand">
@@ -128,9 +133,20 @@
               <div class="kc-row__body">
                 <div class="kc-row__top">
                   <span class="kc-row__title">{{ item.title }}</span>
-                  <span class="kc-row__date">{{ item.date }}</span>
+                  <span class="kc-row__date {{ item.unread > 0 ? 'kc-row__date--unread' : '' }}">
+                    {{ item.date }}
+                  </span>
                 </div>
-                <div class="kc-row__preview">{{ item.preview }}</div>
+                <div class="kc-row__bottom">
+                  <div
+                    class="kc-row__preview {{ item.unread > 0 ? 'kc-row__preview--unread' : '' }}"
+                  >
+                    {{ item.preview }}
+                  </div>
+                  @if(item.unread > 0)
+                    <span class="kc-unread">{{ item.unread > 99 ? '99+' : item.unread }}</span>
+                  @end
+                </div>
               </div>
             </a>
           @end

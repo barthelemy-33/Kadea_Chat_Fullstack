@@ -1,8 +1,10 @@
 import { DateTime } from 'luxon'
 import type User from '#models/user'
+import Message from '#models/message'
 
 /**
- * Prépare la liste des conversations affichée dans la colonne de gauche
+ * Prépare la liste des conversations affichée dans la colonne de gauche,
+ * avec le nombre de messages non lus pour l'utilisateur
  */
 export async function buildConversationItems(user: User) {
   const conversations = await user
@@ -27,6 +29,23 @@ export async function buildConversationItems(user: User) {
       .query()
       .orderBy('createdAt', 'desc')
       .first()
+
+    // Nombre de messages non lus
+    const lastRead = conversation.$extras.pivot_last_read_message_id || 0
+    const joinedAt = conversation.$extras.pivot_joined_at
+
+    const unreadQuery = Message.query()
+      .where('conversationId', conversation.id)
+      .whereNot('senderId', user.id)
+      .whereNull('deletedAt')
+      .where('id', '>', lastRead)
+
+    if (joinedAt) {
+      unreadQuery.where('createdAt', '>=', joinedAt)
+    }
+
+    const unreadRow = await unreadQuery.count('* as total').first()
+    const unread = Number(unreadRow?.$extras.total || 0)
 
     let title = 'Conversation'
     let initials = '?'
@@ -58,7 +77,7 @@ export async function buildConversationItems(user: User) {
       }
     }
 
-    items.push({ id: conversation.id, title, initials, avatarUrl, preview, date })
+    items.push({ id: conversation.id, title, initials, avatarUrl, preview, date, unread })
   }
 
   return items

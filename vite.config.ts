@@ -12,6 +12,7 @@ export default defineConfig({
         'resources/css/app.css',
         'resources/css/auth.css',
         'resources/css/messagerie.css',
+        'resources/css/discussion.css',
         'resources/js/app.js',
       ],
 

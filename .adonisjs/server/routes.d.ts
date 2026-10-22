@@ -31,6 +31,7 @@ export type ScannedRoutes = {
     'profile.avatar': { paramsTuple?: []; params?: {} }
     'users.index': { paramsTuple?: []; params?: {} }
     'groups.new': { paramsTuple?: []; params?: {} }
+    'conversations.read': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'event_stream': { paramsTuple?: []; params?: {} }
     'subscribe': { paramsTuple?: []; params?: {} }
     'unsubscribe': { paramsTuple?: []; params?: {} }
@@ -80,6 +81,7 @@ export type ScannedRoutes = {
     'profile.name': { paramsTuple?: []; params?: {} }
     'profile.password': { paramsTuple?: []; params?: {} }
     'profile.avatar': { paramsTuple?: []; params?: {} }
+    'conversations.read': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'subscribe': { paramsTuple?: []; params?: {} }
     'unsubscribe': { paramsTuple?: []; params?: {} }
   }

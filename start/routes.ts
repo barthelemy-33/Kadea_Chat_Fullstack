@@ -60,6 +60,9 @@ router
     router.post('profile/avatar', [controllers.Profile, 'updateAvatar']).as('profile.avatar')
     router.get('users', [controllers.Conversations, 'directory']).as('users.index')
     router.get('groups/new', [controllers.Conversations, 'newGroup']).as('groups.new')
+    router
+      .post('conversations/:id/read', [controllers.Conversations, 'markRead'])
+      .as('conversations.read')
   })
   .use(middleware.auth())
 

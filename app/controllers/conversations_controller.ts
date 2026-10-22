@@ -1,73 +1,11 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import { DateTime } from 'luxon'
 import User from '#models/user'
 import Conversation from '#models/conversation'
+import Message from '#models/message'
 import { groupValidator } from '#validators/conversation'
+import { buildConversationItems } from '#services/conversation_list'
 
 export default class ConversationsController {
-  /**
-   * Prépare la liste des conversations affichée dans la colonne de gauche
-   */
-  private async buildItems(user: User) {
-    const conversations = await user
-      .related('conversations')
-      .query()
-      .whereNull('conversation_members.left_at')
-      .preload('members')
-      .orderByRaw('conversations.last_message_at DESC NULLS LAST')
-
-    const items = []
-
-    for (const conversation of conversations) {
-      let other: User | null = null
-      for (const member of conversation.members) {
-        if (member.id !== user.id) {
-          other = member
-        }
-      }
-
-      const lastMessage = await conversation
-        .related('messages')
-        .query()
-        .orderBy('createdAt', 'desc')
-        .first()
-
-      let title = 'Conversation'
-      let initials = '?'
-      let avatarUrl: string | null = null
-
-      if (conversation.type === 'group') {
-        title = conversation.name || 'Groupe'
-        initials = (conversation.name || 'G').slice(0, 2).toUpperCase()
-      } else if (other) {
-        title = other.fullName || other.email
-        initials = other.initials
-        avatarUrl = other.avatarUrl
-      }
-
-      let preview = 'Aucun message'
-      let date = ''
-
-      if (lastMessage) {
-        if (lastMessage.deletedAt) {
-          preview = 'Message supprimé'
-        } else {
-          preview = lastMessage.content || ''
-        }
-
-        if (lastMessage.createdAt.hasSame(DateTime.now(), 'day')) {
-          date = lastMessage.createdAt.toFormat('HH:mm')
-        } else {
-          date = lastMessage.createdAt.toFormat('dd/MM')
-        }
-      }
-
-      items.push({ id: conversation.id, title, initials, avatarUrl, preview, date })
-    }
-
-    return items
-  }
-
   async index({ auth, view, request }: HttpContext) {
     const q = String(request.input('q', '')).trim()
     let results: User[] = []
@@ -83,7 +21,7 @@ export default class ConversationsController {
         .limit(10)
     }
 
-    const conversationItems = await this.buildItems(auth.user!)
+    const conversationItems = await buildConversationItems(auth.user!)
 
     return view.render('pages/dashboard', { conversationItems, results, q })
   }
@@ -94,7 +32,7 @@ export default class ConversationsController {
       .whereNotNull('emailVerifiedAt')
       .orderBy('fullName')
 
-    const conversationItems = await this.buildItems(auth.user!)
+    const conversationItems = await buildConversationItems(auth.user!)
 
     return view.render('pages/groups/new', { users, conversationItems })
   }
@@ -114,7 +52,7 @@ export default class ConversationsController {
     }
 
     const users = await query
-    const conversationItems = await this.buildItems(auth.user!)
+    const conversationItems = await buildConversationItems(auth.user!)
 
     return view.render('pages/users', { users, conversationItems, q })
   }
@@ -145,6 +83,15 @@ export default class ConversationsController {
       .query()
       .preload('sender')
       .orderBy('createdAt', 'asc')
+
+    // J'ouvre la conversation : tout est lu jusqu'au dernier message
+    if (messages.length > 0) {
+      await conversation
+        .related('members')
+        .pivotQuery()
+        .where('user_id', auth.user!.id)
+        .update({ last_read_message_id: messages[messages.length - 1].id })
+    }
 
     const members = await conversation
       .related('members')
@@ -178,7 +125,7 @@ export default class ConversationsController {
       .orderBy('fullName')
 
     const isAdmin = await conversation.isAdmin(auth.user!)
-    const conversationItems = await this.buildItems(auth.user!)
+    const conversationItems = await buildConversationItems(auth.user!)
 
     let current = null
     for (const item of conversationItems) {
@@ -198,6 +145,32 @@ export default class ConversationsController {
       conversationItems,
       current,
     })
+  }
+
+  /**
+   * Marque la conversation comme lue (appelée quand un message arrive
+   * pendant que la conversation est ouverte)
+   */
+  async markRead({ auth, params, response }: HttpContext) {
+    const conversation = await Conversation.findOrFail(params.id)
+    if (!(await conversation.isMember(auth.user!))) {
+      return response.forbidden('Accès refusé')
+    }
+
+    const last = await Message.query()
+      .where('conversationId', conversation.id)
+      .orderBy('id', 'desc')
+      .first()
+
+    if (last) {
+      await conversation
+        .related('members')
+        .pivotQuery()
+        .where('user_id', auth.user!.id)
+        .update({ last_read_message_id: last.id })
+    }
+
+    return response.noContent()
   }
 
   async storeGroup({ auth, request, response }: HttpContext) {

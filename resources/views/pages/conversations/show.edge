@@ -1,129 +1,208 @@
-@layouts.app({ title: 'Conversation' })
-  @page()
-    <h1>{{ title }}</h1>
-    @if(conversation.type === 'group')
-      <h2>Membres ({{ memberItems.length }})</h2>
-      <ul>
-        @each(member in memberItems)
-          <li>
-            {{ member.name }}
-            @if(member.role === 'admin')
-              <strong>(admin)</strong>
-            @end
-            @if(isAdmin && member.id !== me)
-              @form({
-                route: 'members.destroy',
-                routeParams: { id: conversation.id, userId: member.id },
-                method: 'POST',
-              })
-                @!button({ text: 'Retirer', type: 'submit' })
-              @end
-            @end
-          </li>
-        @end
-      </ul>
-      @if(isAdmin && candidates.length > 0)
-        @form({
-          route: 'members.store',
-          routeParams: { id: conversation.id },
-          method: 'POST',
-        })
-          <select name="userId">
-            @each(user in candidates)
-              <option value="{{ user.id }}">{{ user.fullName || user.email }}</option>
-            @end
-          </select>
-          @!button({ text: 'Ajouter', type: 'submit' })
-        @end
-      @end
-      @if(!isAdmin)
-        @form({
-          route: 'members.leave',
-          routeParams: { id: conversation.id },
-          method: 'POST',
-        })
-          @!button({ text: 'Quitter le groupe', type: 'submit' })
-        @end
-      @end
-    @end
-
-    <div
-      x-data="chatRoom('conversations/{{ conversation.id }}/messages', '{{ csrfToken }}', {{ me }})"
-    >
-      @if(messages.length === 0)
-        <p x-ref="empty">Aucun message pour l'instant. Écris le premier !</p>
+@layouts.chat({ mode: 'chat', conversationItems, activeId: conversation.id, title })
+  <section class="kc-conv" x-data="{ info: false }">
+    <header class="kc-conv__head">
+      <a href="/dashboard" class="kc-icon-btn kc-conv__back" aria-label="Retour">
+        @svg('lucide:arrow-left', { width: 22, height: 22 })
+      </a>
+      @if(current && current.avatarUrl)
+        <img class="kc-avatar kc-avatar--sm" src="{{ current.avatarUrl }}" alt="" />
+      @else
+        <span class="kc-avatar kc-avatar--sm">{{ current ? current.initials : '?' }}</span>
       @end
 
-      <div x-ref="list">
-        @each(message in messages)
-          <div
-            id="message-{{ message.id }}"
-            style="margin-bottom: 12px;"
-            x-data="{ editing: false }"
-          >
-            <strong>{{ message.sender.fullName || message.sender.email }}</strong>
-            <small>{{ message.createdAt.toFormat('HH:mm') }}</small>
-            <p data-body x-show="!editing">
-              @if(message.deletedAt)
-                <em>
-                  Ce message a été supprimé le
-                  {{ message.deletedAt.toFormat('dd/MM à HH:mm') }}
-                </em>
-              @else
-                {{ message.content }}
-              @end
+      <div class="kc-conv__who">
+        <div class="kc-conv__title">{{ title }}</div>
+        <div class="kc-conv__sub">
+          {{
+            conversation.type === 'group'
+              ? memberItems.length + ' membres'
+              : 'Discussion privée'
+          }}
+        </div>
+      </div>
+      @if(conversation.type === 'group')
+        <button
+          type="button"
+          class="kc-icon-btn"
+          x-on:click="info = !info"
+          aria-label="Infos du groupe"
+        >
+          @svg('lucide:info', { width: 22, height: 22 })
+        </button>
+      @end
+    </header>
+
+    <div class="kc-conv__body">
+      <div
+        class="kc-chat"
+        x-data="chatRoom('conversations/{{ conversation.id }}/messages', '{{ csrfToken }}', {{ me }}, {{ conversation.type === 'group' }})"
+      >
+        <div class="kc-messages" x-ref="scroller">
+          @if(messages.length === 0)
+            <p class="kc-note kc-chat__empty" x-ref="empty">
+              Aucun message pour l'instant. Écris le premier !
             </p>
-            @if(message.editedAt && !message.deletedAt)
-              <small data-edited>(modifié)</small>
-            @end
-            @if(message.senderId === me && !message.deletedAt)
-              <div data-delete>
-                <button type="button" x-show="!editing" x-on:click="editing = true">
-                  Modifier
-                </button>
-                <div x-show="editing">
-                  @form({
-                    route: 'messages.update',
-                    routeParams: { id: message.id },
-                    method: 'POST',
-                  })
-                    <input
-                      type="text"
-                      name="content"
-                      value="{{ message.content }}"
-                      autocomplete="off"
-                    />
-                    @!button({ text: 'Enregistrer', type: 'submit' })
-                    <button type="button" x-on:click="editing = false">Annuler</button>
-                  @end
-                </div>
-                @form({
-                  route: 'messages.destroy',
-                  routeParams: { id: message.id },
-                  method: 'POST',
-                })
-                  @!button({ text: 'Supprimer', type: 'submit' })
+          @end
+
+          <div class="kc-msglist" x-ref="list">
+            @each(message in messages)
+              <div
+                id="message-{{ message.id }}"
+                class="kc-msg {{ message.senderId === me ? 'kc-msg--out' : 'kc-msg--in' }}"
+                x-data="{ editing: false }"
+              >
+                @if(message.senderId === me && !message.deletedAt)
+                  <div data-delete class="kc-tools">
+                    <details class="kc-menu">
+                      <summary aria-label="Options du message">
+                        @svg('lucide:ellipsis', { width: 18, height: 18 })
+                      </summary>
+                      <div class="kc-menu__panel">
+                        <button
+                          type="button"
+                          x-on:click="editing = true; $el.closest('details').open = false"
+                        >
+                          Modifier
+                        </button>
+                        @form({
+                          route: 'messages.destroy',
+                          routeParams: { id: message.id },
+                          method: 'POST',
+                        })
+                          <button type="submit" class="kc-danger">Supprimer</button>
+                        @end
+                      </div>
+                    </details>
+                  </div>
                 @end
+
+                <div class="kc-bubble">
+                  @if(conversation.type === 'group' && message.senderId !== me)
+                    <div class="kc-msg__author">
+                      {{ message.sender.fullName || message.sender.email }}
+                    </div>
+                  @end
+
+                  <p class="kc-msg__text" data-body x-show="!editing">
+                    @if(message.deletedAt)
+                      <em class="kc-deleted">
+                        Ce message a été supprimé le
+                        {{ message.deletedAt.toFormat('dd/MM à HH:mm') }}
+                      </em>
+                    @else
+                      {{ message.content }}
+                    @end
+                  </p>
+                  @if(message.senderId === me && !message.deletedAt)
+                    <div class="kc-edit" x-show="editing" x-cloak>
+                      @form({
+                        route: 'messages.update',
+                        routeParams: { id: message.id },
+                        method: 'POST',
+                      })
+                        <input
+                          type="text"
+                          name="content"
+                          value="{{ message.content }}"
+                          autocomplete="off"
+                          required
+                          maxlength="2000"
+                        />
+                        <div class="kc-edit__actions">
+                          <button type="button" x-on:click="editing = false">Annuler</button>
+                          <button type="submit" class="kc-edit__ok">Enregistrer</button>
+                        </div>
+                      @end
+                    </div>
+                  @end
+                  @if(message.editedAt && !message.deletedAt)
+                    <small data-edited>(modifié)</small>
+                  @end
+
+                  <div class="kc-msg__meta">{{ message.createdAt.toFormat('HH:mm') }}</div>
+                </div>
               </div>
             @end
           </div>
-        @end
+        </div>
       </div>
+      @if(conversation.type === 'group')
+        <aside class="kc-info" x-show="info" x-cloak>
+          <div class="kc-info__head">
+            <strong>Membres ({{ memberItems.length }})</strong>
+            <button type="button" class="kc-icon-btn" x-on:click="info = false" aria-label="Fermer">
+              @svg('lucide:x', { width: 20, height: 20 })
+            </button>
+          </div>
+
+          <ul class="kc-members">
+            @each(member in memberItems)
+              <li class="kc-member">
+                <span class="kc-avatar kc-avatar--sm">
+                  {{ member.name.slice(0, 2).toUpperCase() }}
+                </span>
+                <span class="kc-member__name">
+                  {{ member.name }}
+                  @if(member.role === 'admin')
+                    <span class="kc-badge">admin</span>
+                  @end
+                </span>
+                @if(isAdmin && member.id !== me)
+                  @form({
+                    route: 'members.destroy',
+                    routeParams: { id: conversation.id, userId: member.id },
+                    method: 'POST',
+                  })
+                    <button type="submit" class="kc-link-danger">Retirer</button>
+                  @end
+                @end
+              </li>
+            @end
+          </ul>
+          @if(isAdmin && candidates.length > 0)
+            @form({
+              route: 'members.store',
+              routeParams: { id: conversation.id },
+              method: 'POST',
+              class: 'kc-add',
+            })
+              <select name="userId">
+                @each(user in candidates)
+                  <option value="{{ user.id }}">{{ user.fullName || user.email }}</option>
+                @end
+              </select>
+              <button type="submit" class="kc-btn kc-btn--small">Ajouter</button>
+            @end
+          @end
+          @if(!isAdmin)
+            @form({
+              route: 'members.leave',
+              routeParams: { id: conversation.id },
+              method: 'POST',
+            })
+              <button type="submit" class="kc-leave">Quitter le groupe</button>
+            @end
+          @end
+        </aside>
+      @end
     </div>
     @form({
       route: 'messages.store',
       routeParams: { id: conversation.id },
       method: 'POST',
+      class: 'kc-composer',
     })
-      @field.root({ name: 'content' })
-        @!input.control({
-          type: 'text',
-          placeholder: 'Écris un message...',
-          autocomplete: 'off',
-        })
-        @!field.error()
-      @end
-      @!button({ text: 'Envoyer', type: 'submit' })
+      <input
+        type="text"
+        name="content"
+        placeholder="Écris un message"
+        autocomplete="off"
+        required
+        maxlength="2000"
+      />
+      <button type="submit" class="kc-send" aria-label="Envoyer">
+        @svg('lucide:send', { width: 20, height: 20 })
+      </button>
     @end
-  @end
+  </section>
 @end

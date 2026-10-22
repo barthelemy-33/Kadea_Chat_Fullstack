@@ -16,6 +16,7 @@ export default class User extends compose(UserSchema, withAuthFinder(hash)) {
     pivotTable: 'conversation_members',
     pivotForeignKey: 'user_id',
     pivotRelatedForeignKey: 'conversation_id',
+    pivotColumns: ['last_read_message_id', 'joined_at'],
   })
   declare conversations: ManyToMany<typeof Conversation>
   /**

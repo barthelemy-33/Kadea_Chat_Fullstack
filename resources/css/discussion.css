@@ -1,0 +1,423 @@
+/* =========================================================
+   Kadea Chat : page de discussion
+   ========================================================= */
+.kc-conv {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+.kc-conv__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--card);
+  border-bottom: 1px solid var(--line);
+}
+.kc-conv__back {
+  display: none;
+}
+.kc-avatar--sm {
+  width: 42px;
+  height: 42px;
+  font-size: 14px;
+}
+.kc-conv__who {
+  min-width: 0;
+  flex: 1;
+}
+.kc-conv__title {
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.kc-conv__sub {
+  font-size: 12.5px;
+  color: var(--muted);
+}
+.kc-conv__body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+.kc-chat {
+  height: 100%;
+}
+.kc-messages {
+  height: 100%;
+  overflow-y: auto;
+  padding: 18px 16px;
+  overscroll-behavior: contain;
+}
+.kc-chat__empty {
+  text-align: center;
+  margin-top: 24px;
+}
+.kc-msglist {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+/* Bulles */
+.kc-msg {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+}
+.kc-msg--out {
+  justify-content: flex-end;
+}
+.kc-msg--in {
+  justify-content: flex-start;
+}
+.kc-bubble {
+  max-width: min(78%, 560px);
+  padding: 8px 12px 6px;
+  border-radius: 18px;
+  line-height: 1.45;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  box-shadow: 0 1px 1px rgba(10, 20, 50, 0.06);
+}
+.kc-msg--in .kc-bubble {
+  background: var(--bubble-in);
+  color: var(--bubble-ink);
+  border-bottom-left-radius: 6px;
+}
+.kc-msg--out .kc-bubble {
+  background: var(--bubble-out);
+  color: var(--bubble-ink);
+  border-bottom-right-radius: 6px;
+}
+.kc-msg__author {
+  margin-bottom: 2px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--brand);
+}
+.kc-msg__text {
+  white-space: pre-wrap;
+}
+.kc-msg__meta {
+  margin-top: 2px;
+  text-align: right;
+  font-size: 11px;
+  color: var(--muted);
+}
+.kc-bubble [data-edited] {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+}
+.kc-deleted {
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* Menu d'options sur mes messages */
+.kc-tools {
+  align-self: center;
+}
+.kc-menu {
+  position: relative;
+}
+.kc-menu summary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  color: var(--muted);
+  cursor: pointer;
+  list-style: none;
+}
+.kc-menu summary::-webkit-details-marker {
+  display: none;
+}
+.kc-menu summary:hover {
+  background: var(--line);
+}
+.kc-menu__panel {
+  position: absolute;
+  right: 0;
+  top: 34px;
+  z-index: 8;
+  min-width: 150px;
+  padding: 6px;
+  border-radius: 14px;
+  background: var(--card);
+  border: 1px solid var(--line-2);
+  box-shadow: 0 12px 30px rgba(10, 20, 50, 0.22);
+}
+.kc-menu__panel button {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  text-align: left;
+  font-weight: 600;
+}
+.kc-menu__panel button:hover {
+  background: var(--paper);
+}
+.kc-danger,
+.kc-link-danger {
+  color: var(--danger);
+}
+@media (hover: hover) {
+  .kc-tools {
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .kc-msg:hover .kc-tools,
+  .kc-tools:has(details[open]) {
+    opacity: 1;
+  }
+}
+
+/* Modification d'un message */
+.kc-edit input {
+  width: 100%;
+  min-width: 220px;
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid var(--line-2);
+  background: var(--field);
+  color: var(--ink);
+  font-size: 16px;
+}
+.kc-edit__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 6px;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+.kc-edit__ok {
+  color: var(--brand);
+}
+
+/* Saisie */
+.kc-composer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+  background: var(--card);
+  border-top: 1px solid var(--line);
+}
+.kc-composer input {
+  flex: 1;
+  height: 46px;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid var(--line-2);
+  background: var(--field);
+  color: var(--ink);
+  font-size: 16px;
+}
+.kc-composer input:focus {
+  outline: 2px solid var(--ring);
+  border-color: var(--brand);
+}
+.kc-send {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--btn);
+  color: var(--btn-fg);
+}
+.kc-send:active {
+  transform: scale(0.95);
+}
+
+/* Panneau des membres */
+.kc-info {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 6;
+  width: min(360px, 100%);
+  padding: 16px;
+  overflow-y: auto;
+  background: var(--card);
+  border-left: 1px solid var(--line);
+  box-shadow: -10px 0 30px rgba(10, 20, 50, 0.12);
+}
+.kc-info__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.kc-members {
+  list-style: none;
+  display: grid;
+  gap: 2px;
+}
+.kc-member {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 4px;
+}
+.kc-member__name {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+}
+.kc-badge {
+  margin-left: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--brand-soft);
+  color: var(--brand);
+  font-size: 11px;
+  font-weight: 700;
+}
+.kc-link-danger {
+  font-size: 13px;
+  font-weight: 600;
+}
+.kc-add {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+.kc-add select {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  padding: 0 10px;
+  border-radius: 10px;
+  border: 1px solid var(--line-2);
+  background: var(--field);
+  color: var(--ink);
+  font-size: 16px;
+}
+.kc-leave {
+  width: 100%;
+  margin-top: 18px;
+  height: 44px;
+  border-radius: 12px;
+  border: 1.5px solid var(--danger);
+  color: var(--danger);
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  .kc-conv__back {
+    display: inline-flex;
+  }
+  .kc-bubble {
+    max-width: 86%;
+  }
+  .kc-info {
+    width: 100%;
+    border-left: 0;
+  }
+}
+
+.espace {
+  margin-bottom: 1rem;
+}
+.file-inputt::file-selector-button {
+  background-color: #172e6e;
+  color: white;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+.file-inputt::file-selector-button:hover {
+  background-color: #607ed2;
+}
+/* =========================================================
+   Bulles compactes, façon messagerie
+   ========================================================= */
+.kc-messages {
+  padding: 14px 12px;
+}
+.kc-msglist {
+  gap: 2px;
+}
+/* Plus d'air quand on change d'interlocuteur */
+.kc-msg--out + .kc-msg--in,
+.kc-msg--in + .kc-msg--out {
+  margin-top: 10px;
+}
+
+.kc-bubble {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: flex-end;
+  column-gap: 8px;
+  max-width: min(72%, 520px);
+  padding: 6px 10px 5px;
+  border-radius: 14px;
+  font-size: 15px;
+  line-height: 1.35;
+}
+.kc-msg--in .kc-bubble,
+.kc-msg--out .kc-bubble {
+  border-radius: 14px;
+}
+/* Petit coin marqué sur la première bulle d'une série */
+.kc-msg--in:not(.kc-msg--in + .kc-msg--in) .kc-bubble {
+  border-top-left-radius: 4px;
+}
+.kc-msg--out:not(.kc-msg--out + .kc-msg--out) .kc-bubble {
+  border-top-right-radius: 4px;
+}
+
+.kc-msg__author {
+  flex: 0 0 100%;
+  margin-bottom: 1px;
+  text-align: left;
+}
+.kc-msg__text {
+  min-width: 0;
+  white-space: normal;
+  margin: 0;
+}
+/* L'heure se glisse à droite du texte */
+.kc-msg__meta {
+  margin: 0;
+  padding-top: 4px;
+  font-size: 11px;
+  line-height: 1;
+  white-space: nowrap;
+  align-self: flex-end;
+}
+.kc-bubble [data-edited] {
+  display: inline;
+  padding-top: 4px;
+  font-size: 11px;
+  line-height: 1;
+  align-self: flex-end;
+}
+.kc-edit {
+  flex: 0 0 100%;
+}
+
+@media (max-width: 900px) {
+  .kc-bubble {
+    max-width: 84%;
+  }
+}
