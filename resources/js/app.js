@@ -253,5 +253,20 @@ Alpine.data('sidebarLive', function (userId, csrfToken) {
     },
   }
 })
+// Ferme le menu d'un message quand on touche le fond ou la touche Échap
+document.addEventListener('click', (event) => {
+  document.querySelectorAll('details.kc-menu[open]').forEach((menu) => {
+    if (!menu.contains(event.target) || event.target === menu) {
+      menu.removeAttribute('open')
+    }
+  })
+})
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') {
+    document.querySelectorAll('details.kc-menu[open]').forEach((menu) => {
+      menu.removeAttribute('open')
+    })
+  }
+})
 
 Alpine.start()

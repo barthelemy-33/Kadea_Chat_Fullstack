@@ -67,7 +67,8 @@ export async function buildConversationItems(user: User) {
       if (lastMessage.deletedAt) {
         preview = 'Message supprimé'
       } else {
-        preview = lastMessage.content || ''
+        const text = (lastMessage.content || '').replace(/\s+/g, ' ').trim()
+        preview = text.length > 60 ? text.slice(0, 60) + '…' : text
       }
 
       if (lastMessage.createdAt.hasSame(DateTime.now(), 'day')) {
