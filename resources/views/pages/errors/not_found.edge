@@ -1,16 +1,11 @@
-@marketing()
-  <div class="home">
-    <article class="prose-card">
-      <div class="pc-top">
-        <span class="pc-status mono tag" style="color: var(--subtle);">
-          <span class="dot"></span>
-          404
-        </span>
-      </div>
-      <div class="pc-lead"><span>Not found.</span> <em>That route hasn't been built yet.</em></div>
-      <p class="pc-para">
-        The page you tried to reach doesn't exist. Check the URL or head back home.
-      </p>
-    </article>
+@layouts.plain({ title: 'Page introuvable' })
+  <div class="kc-empty">
+    <div class="kc-empty__mark">
+      @svg('lucide:compass', { width: 30, height: 30 })
+    </div>
+    <p class="kc-code">404</p>
+    <h1>Page introuvable</h1>
+    <p>La page que tu cherches n'existe pas ou a été déplacée.</p>
+    <a href="/dashboard" class="kc-btn">Retour à l'accueil</a>
   </div>
 @end

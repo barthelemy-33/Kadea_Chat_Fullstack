@@ -1,0 +1,13 @@
+@layouts.plain({ title: 'Accès refusé' })
+  <div class="kc-empty">
+    <div class="kc-empty__mark">
+      @svg('lucide:lock', { width: 30, height: 30 })
+    </div>
+    <p class="kc-code">403</p>
+    <h1>Accès refusé</h1>
+    <p>
+      Tu n'as pas accès à cette page. Si tu as laissé la page ouverte longtemps, reconnecte-toi et réessaie.
+    </p>
+    <a href="/dashboard" class="kc-btn">Retour à mes conversations</a>
+  </div>
+@end

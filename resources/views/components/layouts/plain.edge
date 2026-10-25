@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html
+  lang="fr"
+  data-theme="{{
+    request.plainCookie('app_theme', {
+      defaultValue: 'light',
+      encoded: false,
+    })
+  }}"
+>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>
+      {{
+        $props.get('title')
+          ? $props.get('title') + ' · Kadea Chat'
+          : 'Kadea Chat'
+      }}
+    </title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+  </head>
+  <body>
+    <main class="kc-plain">{{{ await $slots.main() }}}</main>
+  </body>
+</html>
