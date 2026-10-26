@@ -4,6 +4,7 @@ import Conversation from '#models/conversation'
 import Message from '#models/message'
 import { groupValidator } from '#validators/conversation'
 import { buildConversationItems } from '#services/conversation_list'
+import transmit from '@adonisjs/transmit/services/main'
 
 export default class ConversationsController {
   async index({ auth, view, request }: HttpContext) {
@@ -86,11 +87,21 @@ export default class ConversationsController {
 
     // J'ouvre la conversation : tout est lu jusqu'au dernier message
     if (messages.length > 0) {
+      const lastId = messages[messages.length - 1].id
+
       await conversation
         .related('members')
         .pivotQuery()
         .where('user_id', auth.user!.id)
-        .update({ last_read_message_id: messages[messages.length - 1].id })
+        .update({ last_read_message_id: lastId })
+
+      // Les autres voient leurs coches passer à « lu »
+      transmit.broadcast(`conversations/${conversation.id}/messages`, {
+        type: 'read',
+        userId: auth.user!.id,
+        upTo: lastId,
+      })
+      await conversation.notifyMembers(auth.user!.id)
     }
 
     const members = await conversation
@@ -111,6 +122,22 @@ export default class ConversationsController {
 
       if (conversation.type === 'private' && member.id !== auth.user!.id) {
         title = member.fullName || member.email
+      }
+    }
+
+    // Où en est la lecture des autres membres ?
+    const readMap: Record<number, number> = {}
+    let minRead = 0
+    let first = true
+
+    for (const member of members) {
+      if (member.id !== auth.user!.id) {
+        const lastRead = member.$extras.pivot_last_read_message_id || 0
+        readMap[member.id] = lastRead
+        if (first || lastRead < minRead) {
+          minRead = lastRead
+          first = false
+        }
       }
     }
 
@@ -144,6 +171,8 @@ export default class ConversationsController {
       candidates,
       conversationItems,
       current,
+      minRead,
+      readJson: JSON.stringify(readMap),
     })
   }
 
@@ -168,7 +197,14 @@ export default class ConversationsController {
         .pivotQuery()
         .where('user_id', auth.user!.id)
         .update({ last_read_message_id: last.id })
+
+      transmit.broadcast(`conversations/${conversation.id}/messages`, {
+        type: 'read',
+        userId: auth.user!.id,
+        upTo: last.id,
+      })
     }
+    await conversation.notifyMembers(auth.user!.id)
 
     return response.noContent()
   }
@@ -179,5 +215,26 @@ export default class ConversationsController {
     await conversation.notifyMembers(auth.user!.id)
 
     return response.redirect().toRoute('conversations.show', { id: conversation.id })
+  }
+
+  async reads({ auth, params, response }: HttpContext) {
+    const conversation = await Conversation.findOrFail(params.id)
+    if (!(await conversation.isMember(auth.user!))) {
+      return response.abort('Accès refusé', 403)
+    }
+
+    const members = await conversation
+      .related('members')
+      .query()
+      .whereNull('conversation_members.left_at')
+
+    const map: Record<number, number> = {}
+    for (const member of members) {
+      if (member.id !== auth.user!.id) {
+        map[member.id] = member.$extras.pivot_last_read_message_id || 0
+      }
+    }
+
+    return response.json(map)
   }
 }

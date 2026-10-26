@@ -64,6 +64,9 @@ router
       .post('conversations/:id/read', [controllers.Conversations, 'markRead'])
       .as('conversations.read')
     router.get('search', [controllers.Searches, 'index']).as('search')
+    router
+      .get('conversations/:id/reads', [controllers.Conversations, 'reads'])
+      .as('conversations.reads')
   })
   .use(middleware.auth())
 

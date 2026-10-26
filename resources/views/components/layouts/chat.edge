@@ -149,6 +149,11 @@
                   <div
                     class="kc-row__preview {{ item.unread > 0 ? 'kc-row__preview--unread' : '' }}"
                   >
+                    @if(item.status)
+                      <span class="kc-ticks {{ item.status === 'read' ? 'kc-ticks--read' : '' }}">
+                        {{ item.status === 'read' ? '✓✓' : '✓' }}
+                      </span>
+                    @end
                     {{ item.preview }}
                   </div>
                   @if(item.unread > 0)

@@ -421,3 +421,14 @@
     max-width: 84%;
   }
 }
+/* Coches d'envoi et de lecture */
+.kc-ticks {
+  margin-left: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: -0.12em;
+  color: var(--muted);
+}
+.kc-ticks--read {
+  color: var(--brand);
+}

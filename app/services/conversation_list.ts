@@ -47,6 +47,28 @@ export async function buildConversationItems(user: User) {
     const unreadRow = await unreadQuery.count('* as total').first()
     const unread = Number(unreadRow?.$extras.total || 0)
 
+    // État de mon dernier message : envoyé (✓) ou lu (✓✓)
+    let status: 'sent' | 'read' | null = null
+
+    if (lastMessage && lastMessage.senderId === user.id && !lastMessage.deletedAt) {
+      let minRead = 0
+      let others = 0
+
+      for (const member of conversation.members) {
+        if (member.id === user.id || member.$extras.pivot_left_at) {
+          continue
+        }
+
+        const lastReadId = member.$extras.pivot_last_read_message_id || 0
+        if (others === 0 || lastReadId < minRead) {
+          minRead = lastReadId
+        }
+        others++
+      }
+
+      status = others > 0 && lastMessage.id <= minRead ? 'read' : 'sent'
+    }
+
     let title = 'Conversation'
     let initials = '?'
     let avatarUrl: string | null = null
@@ -78,7 +100,17 @@ export async function buildConversationItems(user: User) {
       }
     }
 
-    items.push({ id: conversation.id, title, initials, avatarUrl, preview, date, unread })
+    items.push({
+      id: conversation.id,
+      title,
+      initials,
+      avatarUrl,
+      preview,
+      date,
+      unread,
+      status,
+      otherId: conversation.type === 'private' && other ? other.id : null,
+    })
   }
 
   return items

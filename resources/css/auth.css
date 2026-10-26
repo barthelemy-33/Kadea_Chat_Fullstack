@@ -266,3 +266,9 @@
     box-shadow: 0 1px 1px rgba(10, 20, 50, 0.06);
   }
 }
+
+/* Coches devant l'aperçu dans la liste */
+.kc-row__preview .kc-ticks {
+  margin-left: 0;
+  margin-right: 4px;
+}

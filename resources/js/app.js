@@ -33,36 +33,73 @@ Alpine.data('themeToggle', function () {
   }
 })
 
-Alpine.data('chatRoom', function (channel, csrfToken, me, isGroup) {
+Alpine.data('chatRoom', function (channel, csrfToken, me, isGroup, initialReads) {
   return {
+    reads: initialReads || {},
     async init() {
-      const wanted = window.location.hash
-        ? document.getElementById(window.location.hash.slice(1))
-        : null
+      // 1. Se placer sur le bon message (protégé : une erreur ici ne bloque rien)
+      try {
+        const wanted = window.location.hash
+          ? document.getElementById(window.location.hash.slice(1))
+          : null
 
-      if (wanted) {
-        this.$nextTick(() => {
-          wanted.scrollIntoView({ block: 'center' })
-          wanted.classList.add('kc-msg--flash')
-          setTimeout(() => wanted.classList.remove('kc-msg--flash'), 2600)
-        })
-      } else {
-        this.scrollDown()
+        if (wanted) {
+          this.$nextTick(() => {
+            wanted.scrollIntoView({ block: 'center' })
+            wanted.classList.add('kc-msg--flash')
+            setTimeout(() => wanted.classList.remove('kc-msg--flash'), 2600)
+          })
+        } else {
+          this.scrollDown()
+        }
+      } catch (error) {
+        console.error('Kadea : défilement', error)
       }
+
+      // 2. L'abonnement aux messages : le plus important, avant tout le reste
+      const transmit = new Transmit({
+        baseUrl: window.location.origin,
+        beforeSubscribe: (request) => {
+          request.headers.set('X-CSRF-TOKEN', csrfToken)
+        },
+        beforeUnsubscribe: (request) => {
+          request.headers.set('X-CSRF-TOKEN', csrfToken)
+        },
+      })
       const subscription = transmit.subscription(channel)
       await subscription.create()
+      console.log('Kadea : abonné au canal', channel)
 
       subscription.onMessage((data) => {
-        if (data.type === 'deleted') {
-          this.markDeleted(data)
-        } else if (data.type === 'edited') {
-          this.markEdited(data)
-        } else if (data.type === 'member_added' || data.type === 'member_removed') {
-          this.membersChanged(data)
-        } else {
-          this.addMessage(data)
+        try {
+          if (data.type === 'deleted') {
+            this.markDeleted(data)
+          } else if (data.type === 'edited') {
+            this.markEdited(data)
+          } else if (data.type === 'read') {
+            this.onRead(data)
+          } else if (data.type === 'typing') {
+            this.onTyping(data)
+          } else if (data.type === 'member_added' || data.type === 'member_removed') {
+            this.membersChanged(data)
+          } else {
+            this.addMessage(data)
+          }
+        } catch (error) {
+          console.error('Kadea : événement ignoré', data, error)
         }
       })
+
+      // 3. Les options de confort, protégées : elles ne bloquent jamais les messages
+      try {
+        const input = document.querySelector('.kc-composer input[name="content"]')
+        if (input) {
+          input.addEventListener('input', () => this.notifyTyping())
+        }
+        this.refreshReads()
+      } catch (error) {
+        console.error('Kadea : options de confort', error)
+      }
     },
 
     scrollDown() {
@@ -72,6 +109,53 @@ Alpine.data('chatRoom', function (channel, csrfToken, me, isGroup) {
           box.scrollTop = box.scrollHeight
         }
       })
+    },
+
+    async refreshReads() {
+      try {
+        const id = channel.split('/')[1]
+        const response = await fetch('/conversations/' + id + '/reads', {
+          credentials: 'same-origin',
+          headers: { Accept: 'application/json' },
+        })
+        if (!response.ok) {
+          return
+        }
+
+        const fresh = await response.json()
+        for (const userId of Object.keys(fresh)) {
+          const previous = this.reads[userId] || 0
+          this.reads[userId] = Math.max(previous, fresh[userId])
+        }
+        this.updateTicks()
+      } catch (error) {
+        // Pas grave : les coches seront mises à jour au prochain événement
+      }
+    },
+
+    onRead(data) {
+      // Mes propres lectures ne concernent pas mes coches
+      if (data.userId === me) {
+        return
+      }
+      const previous = this.reads[data.userId] || 0
+      this.reads[data.userId] = Math.max(previous, data.upTo)
+      this.updateTicks()
+    },
+
+    updateTicks() {
+      const values = Object.values(this.reads)
+      let minRead = 0
+      if (values.length > 0) {
+        minRead = Math.min(...values)
+      }
+
+      const ticks = this.$refs.list.querySelectorAll('[data-ticks]')
+      for (const el of ticks) {
+        const read = Number(el.getAttribute('data-id')) <= minRead
+        el.textContent = read ? '✓✓' : '✓'
+        el.classList.toggle('kc-ticks--read', read)
+      }
     },
     markRead() {
       const id = channel.split('/')[1]
@@ -113,6 +197,14 @@ Alpine.data('chatRoom', function (channel, csrfToken, me, isGroup) {
       const meta = document.createElement('div')
       meta.className = 'kc-msg__meta'
       meta.textContent = data.time
+      if (mine) {
+        const ticks = document.createElement('span')
+        ticks.className = 'kc-ticks'
+        ticks.setAttribute('data-ticks', '')
+        ticks.setAttribute('data-id', data.id)
+        ticks.textContent = '✓'
+        meta.append(' ', ticks)
+      }
 
       bubble.append(text, meta)
       row.append(bubble)
@@ -137,6 +229,11 @@ Alpine.data('chatRoom', function (channel, csrfToken, me, isGroup) {
       indication.className = 'kc-deleted'
       indication.textContent = 'Ce message a été supprimé le ' + data.deletedAt
       body.replaceChildren(indication)
+
+      const ticks = block.querySelector('[data-ticks]')
+      if (ticks) {
+        ticks.remove()
+      }
 
       const tools = block.querySelector('[data-delete]')
       if (tools) {

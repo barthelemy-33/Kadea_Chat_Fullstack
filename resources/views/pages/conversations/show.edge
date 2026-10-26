@@ -35,7 +35,7 @@
     <div class="kc-conv__body">
       <div
         class="kc-chat"
-        x-data="chatRoom('conversations/{{ conversation.id }}/messages', '{{ csrfToken }}', {{ me }}, {{ conversation.type === 'group' }})"
+        x-data="chatRoom('conversations/{{ conversation.id }}/messages', '{{ csrfToken }}', {{ me }}, {{ conversation.type === 'group' }}, {{ readJson }})"
       >
         <div class="kc-messages" x-ref="scroller">
           @if(messages.length === 0)
@@ -119,7 +119,18 @@
                     <small data-edited>(modifié)</small>
                   @end
 
-                  <div class="kc-msg__meta">{{ message.createdAt.toFormat('HH:mm') }}</div>
+                  <div class="kc-msg__meta">
+                    {{ message.createdAt.toFormat('HH:mm') }}
+                    @if(message.senderId === me && !message.deletedAt)
+                      <span
+                        data-ticks
+                        data-id="{{ message.id }}"
+                        class="kc-ticks {{ message.id <= minRead ? 'kc-ticks--read' : '' }}"
+                      >
+                        {{ message.id <= minRead ? '✓✓' : '✓' }}
+                      </span>
+                    @end
+                  </div>
                 </div>
               </div>
             @end
