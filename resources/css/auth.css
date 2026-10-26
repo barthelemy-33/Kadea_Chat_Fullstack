@@ -228,3 +228,41 @@
   text-transform: uppercase;
   color: var(--muted);
 }
+/* Recherche dans les messages */
+.kc-results {
+  display: grid;
+  gap: 2px;
+}
+.kc-result {
+  align-items: flex-start;
+}
+.kc-snippet {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.kc-snippet strong {
+  color: var(--ink-2);
+}
+.kc-snippet mark {
+  padding: 0 3px;
+  border-radius: 4px;
+  background: var(--brand-soft);
+  color: var(--brand);
+  font-weight: 700;
+}
+
+/* Le message trouvé clignote un instant */
+.kc-msg--flash .kc-bubble {
+  animation: kcFlash 2.6s ease;
+}
+@keyframes kcFlash {
+  0%,
+  60% {
+    box-shadow: 0 0 0 3px var(--brand);
+  }
+  100% {
+    box-shadow: 0 1px 1px rgba(10, 20, 50, 0.06);
+  }
+}

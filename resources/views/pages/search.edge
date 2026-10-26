@@ -1,0 +1,51 @@
+@layouts.chat({ mode: 'chat', tab: 'chats', conversationItems, title: 'Recherche' })
+  <div class="kc-page">
+    <h1 class="kc-h1">Rechercher dans les messages</h1>
+    <p class="kc-lead">Retrouve un mot dans toutes tes conversations.</p>
+    @form({ route: 'search', method: 'GET', class: 'kc-search kc-search--page' })
+      <input
+        type="search"
+        name="q"
+        value="{{ q }}"
+        placeholder="Tape un mot ou une phrase"
+        autocomplete="off"
+        required
+        minlength="2"
+      />
+    @end
+    @if(q.length < 2)
+      <p class="kc-note">Tape au moins 2 caractères pour lancer la recherche.</p>
+    @elseif(results.length === 0)
+      <p class="kc-note">Aucun message trouvé pour « {{ q }} ».</p>
+    @else
+      <p class="kc-note">{{ results.length }} résultat(s)</p>
+      <div class="kc-results">
+        @each(result in results)
+          <a
+            href="/conversations/{{ result.conversationId }}#message-{{ result.id }}"
+            class="kc-row kc-result"
+          >
+            @if(result.avatarUrl)
+              <img class="kc-avatar" src="{{ result.avatarUrl }}" alt="" />
+            @else
+              <span class="kc-avatar">{{ result.initials }}</span>
+            @end
+
+            <div class="kc-row__body">
+              <div class="kc-row__top">
+                <span class="kc-row__title">{{ result.title }}</span>
+                <span class="kc-row__date">{{ result.date }}</span>
+              </div>
+              <div class="kc-snippet">
+                <strong>{{ result.author }} :</strong>
+                {{ result.snippet.before }}<mark>
+                  {{ result.snippet.match }}
+                </mark>{{ result.snippet.after }}
+              </div>
+            </div>
+          </a>
+        @end
+      </div>
+    @end
+  </div>
+@end

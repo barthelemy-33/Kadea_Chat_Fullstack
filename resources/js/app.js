@@ -36,17 +36,19 @@ Alpine.data('themeToggle', function () {
 Alpine.data('chatRoom', function (channel, csrfToken, me, isGroup) {
   return {
     async init() {
-      this.scrollDown()
+      const wanted = window.location.hash
+        ? document.getElementById(window.location.hash.slice(1))
+        : null
 
-      const transmit = new Transmit({
-        baseUrl: window.location.origin,
-        beforeSubscribe: (request) => {
-          request.headers.set('X-CSRF-TOKEN', csrfToken)
-        },
-        beforeUnsubscribe: (request) => {
-          request.headers.set('X-CSRF-TOKEN', csrfToken)
-        },
-      })
+      if (wanted) {
+        this.$nextTick(() => {
+          wanted.scrollIntoView({ block: 'center' })
+          wanted.classList.add('kc-msg--flash')
+          setTimeout(() => wanted.classList.remove('kc-msg--flash'), 2600)
+        })
+      } else {
+        this.scrollDown()
+      }
       const subscription = transmit.subscription(channel)
       await subscription.create()
 

@@ -49,6 +49,14 @@
           </a>
           <div class="kc-sidebar__actions">
             <a
+              href="/search"
+              class="kc-icon-btn"
+              title="Rechercher dans les messages"
+              aria-label="Rechercher dans les messages"
+            >
+              @svg('lucide:search', { width: 19, height: 19 })
+            </a>
+            <a
               href="/users"
               class="kc-icon-btn kc-hide-mobile"
               title="Nouvelle discussion"
@@ -157,7 +165,6 @@
           @end
         </nav>
       </aside>
-
       <main class="kc-main">{{{ await $slots.main() }}}</main>
     </div>
     @if(mode === 'list')

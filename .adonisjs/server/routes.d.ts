@@ -32,6 +32,7 @@ export type ScannedRoutes = {
     'users.index': { paramsTuple?: []; params?: {} }
     'groups.new': { paramsTuple?: []; params?: {} }
     'conversations.read': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'search': { paramsTuple?: []; params?: {} }
     'event_stream': { paramsTuple?: []; params?: {} }
     'subscribe': { paramsTuple?: []; params?: {} }
     'unsubscribe': { paramsTuple?: []; params?: {} }
@@ -48,6 +49,7 @@ export type ScannedRoutes = {
     'profile.show': { paramsTuple?: []; params?: {} }
     'users.index': { paramsTuple?: []; params?: {} }
     'groups.new': { paramsTuple?: []; params?: {} }
+    'search': { paramsTuple?: []; params?: {} }
     'event_stream': { paramsTuple?: []; params?: {} }
   }
   HEAD: {
@@ -62,6 +64,7 @@ export type ScannedRoutes = {
     'profile.show': { paramsTuple?: []; params?: {} }
     'users.index': { paramsTuple?: []; params?: {} }
     'groups.new': { paramsTuple?: []; params?: {} }
+    'search': { paramsTuple?: []; params?: {} }
     'event_stream': { paramsTuple?: []; params?: {} }
   }
   POST: {
