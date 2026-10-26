@@ -67,6 +67,10 @@ router
     router
       .get('conversations/:id/reads', [controllers.Conversations, 'reads'])
       .as('conversations.reads')
+    router
+      .post('conversations/:id/typing', [controllers.Conversations, 'typing'])
+      .as('conversations.typing')
+    router.post('presence', [controllers.Presences, 'beat']).as('presence.beat')
   })
   .use(middleware.auth())
 

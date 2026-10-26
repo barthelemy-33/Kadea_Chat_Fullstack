@@ -12,7 +12,15 @@
 
       <div class="kc-conv__who">
         <div class="kc-conv__title">{{ title }}</div>
-        <div class="kc-conv__sub">
+        <div
+          class="kc-conv__sub"
+          data-default="{{
+            conversation.type === 'group'
+              ? memberItems.length + ' membres'
+              : 'Discussion privée'
+          }}"
+          data-presence-user="{{ conversation.type === 'private' && current ? current.otherId : '' }}"
+        >
           {{
             conversation.type === 'group'
               ? memberItems.length + ' membres'
@@ -134,6 +142,14 @@
                 </div>
               </div>
             @end
+          </div>
+          <div class="kc-msglist">
+            <div class="kc-msg kc-msg--in kc-typing-row" x-ref="typing" hidden>
+              <div class="kc-bubble kc-bubble--typing">
+                <span class="kc-typing__who"></span>
+                <span class="kc-dots"><i></i><i></i><i></i></span>
+              </div>
+            </div>
           </div>
         </div>
       </div>

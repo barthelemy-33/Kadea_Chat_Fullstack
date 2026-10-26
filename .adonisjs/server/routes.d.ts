@@ -34,6 +34,8 @@ export type ScannedRoutes = {
     'conversations.read': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'search': { paramsTuple?: []; params?: {} }
     'conversations.reads': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'conversations.typing': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'presence.beat': { paramsTuple?: []; params?: {} }
     'event_stream': { paramsTuple?: []; params?: {} }
     'subscribe': { paramsTuple?: []; params?: {} }
     'unsubscribe': { paramsTuple?: []; params?: {} }
@@ -88,6 +90,8 @@ export type ScannedRoutes = {
     'profile.password': { paramsTuple?: []; params?: {} }
     'profile.avatar': { paramsTuple?: []; params?: {} }
     'conversations.read': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'conversations.typing': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'presence.beat': { paramsTuple?: []; params?: {} }
     'subscribe': { paramsTuple?: []; params?: {} }
     'unsubscribe': { paramsTuple?: []; params?: {} }
   }

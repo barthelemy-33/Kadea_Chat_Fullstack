@@ -272,3 +272,114 @@
   margin-left: 0;
   margin-right: 4px;
 }
+
+/* Présence en ligne et saisie en cours */
+.kc-row {
+  position: relative;
+}
+.kc-row.kc-online::after {
+  content: '';
+  position: absolute;
+  left: 47px;
+  top: calc(50% + 10px);
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #22c55e;
+  border: 2px solid var(--card);
+}
+.kc-row--active.kc-online::after {
+  border-color: var(--brand-soft);
+}
+.kc-conv__sub.kc-online-text {
+  color: #16a34a;
+  font-weight: 600;
+}
+.kc-conv__sub.kc-typing {
+  color: var(--brand);
+  font-weight: 600;
+  font-style: italic;
+}
+/* Pastille « en ligne », collée à la photo */
+.kc-row.kc-online::after {
+  display: none;
+}
+.kc-avatar-wrap {
+  position: relative;
+  flex: none;
+  display: inline-flex;
+}
+.kc-dot {
+  display: none;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #22c55e;
+  border: 2px solid var(--card);
+}
+.kc-row.kc-online .kc-dot {
+  display: block;
+}
+.kc-row--active .kc-dot {
+  border-color: var(--brand-soft);
+}
+/* Bulle « écrit… » */
+.kc-typing-row[hidden] {
+  display: none;
+}
+.kc-bubble--typing {
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 10px 14px;
+}
+.kc-typing__who {
+  flex: 0 0 100%;
+  margin-bottom: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--brand);
+}
+.kc-typing__who:empty {
+  display: none;
+}
+.kc-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 16px;
+}
+.kc-dots i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--muted);
+  animation: kcBounce 1.2s infinite ease-in-out;
+}
+.kc-dots i:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.kc-dots i:nth-child(3) {
+  animation-delay: 0.3s;
+}
+@keyframes kcBounce {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.45;
+  }
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kc-dots i {
+    animation: none;
+    opacity: 0.7;
+  }
+}

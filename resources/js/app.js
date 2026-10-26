@@ -1,6 +1,26 @@
 import { Transmit } from '@adonisjs/transmit-client'
 import Alpine from 'alpinejs'
 
+// Affiche le sous-titre de l'en-tête : « écrit… », « en ligne » ou le texte normal
+function renderSubtitle() {
+  const sub = document.querySelector('.kc-conv__sub')
+  if (!sub) {
+    return
+  }
+
+  sub.classList.remove('kc-typing', 'kc-online-text')
+
+  if (sub.dataset.typing) {
+    sub.textContent = sub.dataset.typing
+    sub.classList.add('kc-typing')
+  } else if (sub.dataset.online === '1') {
+    sub.textContent = 'en ligne'
+    sub.classList.add('kc-online-text')
+  } else {
+    sub.textContent = sub.dataset.default || ''
+  }
+}
+
 Alpine.data('alert', function () {
   return {
     isVisible: false,
@@ -39,6 +59,10 @@ Alpine.data('chatRoom', function (channel, csrfToken, me, isGroup, initialReads)
     async init() {
       // 1. Se placer sur le bon message (protégé : une erreur ici ne bloque rien)
       try {
+        const input = document.querySelector('.kc-composer input[name="content"]')
+        if (input) {
+          input.addEventListener('input', () => this.notifyTyping())
+        }
         const wanted = window.location.hash
           ? document.getElementById(window.location.hash.slice(1))
           : null
@@ -78,6 +102,8 @@ Alpine.data('chatRoom', function (channel, csrfToken, me, isGroup, initialReads)
             this.markEdited(data)
           } else if (data.type === 'read') {
             this.onRead(data)
+          } else if (data.type === 'typing') {
+            this.onTyping(data)
           } else if (data.type === 'typing') {
             this.onTyping(data)
           } else if (data.type === 'member_added' || data.type === 'member_removed') {
@@ -166,6 +192,63 @@ Alpine.data('chatRoom', function (channel, csrfToken, me, isGroup, initialReads)
       }).catch(() => {})
     },
 
+    notifyTyping() {
+      const now = Date.now()
+      if (now - (this.lastTyping || 0) < 2500) {
+        return
+      }
+      this.lastTyping = now
+
+      const id = channel.split('/')[1]
+      fetch('/conversations/' + id + '/typing', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'X-CSRF-TOKEN': csrfToken },
+      }).catch(() => {})
+    },
+
+    onTyping(data) {
+      if (data.userId === me) {
+        return
+      }
+
+      // Dans l'en-tête
+      const sub = document.querySelector('.kc-conv__sub')
+      if (sub) {
+        sub.dataset.typing = isGroup ? data.name + ' écrit…' : 'écrit…'
+        renderSubtitle()
+      }
+
+      // Dans une bulle, en bas de la discussion
+      const bubble = this.$refs.typing
+      if (bubble) {
+        const box = this.$refs.scroller
+        const nearBottom = box ? box.scrollHeight - box.scrollTop - box.clientHeight < 140 : true
+
+        bubble.querySelector('.kc-typing__who').textContent = isGroup ? data.name : ''
+        bubble.hidden = false
+
+        if (nearBottom) {
+          this.scrollDown()
+        }
+      }
+
+      clearTimeout(this.typingTimer)
+      this.typingTimer = setTimeout(() => this.stopTyping(), 3500)
+    },
+
+    stopTyping() {
+      const sub = document.querySelector('.kc-conv__sub')
+      if (sub) {
+        delete sub.dataset.typing
+        renderSubtitle()
+      }
+
+      if (this.$refs.typing) {
+        this.$refs.typing.hidden = true
+      }
+    },
+
     addMessage(data) {
       const box = this.$refs.scroller
       const nearBottom = box ? box.scrollHeight - box.scrollTop - box.clientHeight < 140 : true
@@ -215,6 +298,13 @@ Alpine.data('chatRoom', function (channel, csrfToken, me, isGroup, initialReads)
       }
       if (!mine) {
         this.markRead()
+
+        // L'autre vient d'envoyer : il n'écrit plus
+        const sub = document.querySelector('.kc-conv__sub')
+        if (sub) {
+          delete sub.dataset.typing
+          renderSubtitle()
+        }
       }
     },
 
@@ -278,10 +368,16 @@ Alpine.data('chatRoom', function (channel, csrfToken, me, isGroup, initialReads)
 
 Alpine.data('sidebarLive', function (userId, csrfToken) {
   return {
+    online: [],
+
     async init() {
       if (!userId) {
         return
       }
+
+      // Présence : un signal tout de suite, puis toutes les 25 secondes
+      this.beat()
+      setInterval(() => this.beat(), 25000)
 
       const transmit = new Transmit({
         baseUrl: window.location.origin,
@@ -295,10 +391,41 @@ Alpine.data('sidebarLive', function (userId, csrfToken) {
       const subscription = transmit.subscription('users/' + userId)
       await subscription.create()
 
-      subscription.onMessage((data) => {
-        console.log('Kadea : mise à jour de la liste', data)
+      subscription.onMessage(() => {
         this.refreshList()
       })
+    },
+
+    async beat() {
+      try {
+        const response = await fetch('/presence', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
+        })
+        if (!response.ok) {
+          return
+        }
+        this.online = await response.json()
+        this.applyPresence()
+      } catch (error) {
+        // Pas grave : le prochain signal réessaiera
+      }
+    },
+
+    applyPresence() {
+      const rows = document.querySelectorAll('.kc-list [data-user-id]')
+      for (const row of rows) {
+        const id = Number(row.dataset.userId)
+        row.classList.toggle('kc-online', id > 0 && this.online.includes(id))
+      }
+
+      const sub = document.querySelector('.kc-conv__sub')
+      if (sub && sub.dataset.presenceUser) {
+        const id = Number(sub.dataset.presenceUser)
+        sub.dataset.online = this.online.includes(id) ? '1' : '0'
+        renderSubtitle()
+      }
     },
 
     async refreshList() {
@@ -324,7 +451,6 @@ Alpine.data('sidebarLive', function (userId, csrfToken) {
 
         current.innerHTML = fresh.innerHTML
 
-        // Remettre en évidence la conversation ouverte
         // La conversation ouverte : mise en évidence, et jamais de « non lu »
         const match = window.location.pathname.match(/^\/conversations\/(\d+)/)
         if (match) {
@@ -346,6 +472,9 @@ Alpine.data('sidebarLive', function (userId, csrfToken) {
             }
           }
         }
+
+        // La liste vient d'être remplacée : on remet les pastilles de présence
+        this.applyPresence()
       } catch (error) {
         console.error('Kadea : impossible de rafraîchir la liste', error)
       }

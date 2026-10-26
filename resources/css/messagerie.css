@@ -3,7 +3,7 @@
    ========================================================= */
 .kc-app {
   display: grid;
-  grid-template-columns: minmax(300px, 380px) 1fr;
+  grid-template-columns: minmax(300px, 380px) 1.5fr;
   height: 100vh;
   height: 100dvh;
   background: var(--paper);

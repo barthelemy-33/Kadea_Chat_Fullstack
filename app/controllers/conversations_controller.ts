@@ -237,4 +237,19 @@ export default class ConversationsController {
 
     return response.json(map)
   }
+
+  async typing({ auth, params, response }: HttpContext) {
+    const conversation = await Conversation.findOrFail(params.id)
+    if (!(await conversation.isMember(auth.user!))) {
+      return response.abort('Accès refusé', 403)
+    }
+
+    transmit.broadcast(`conversations/${conversation.id}/messages`, {
+      type: 'typing',
+      userId: auth.user!.id,
+      name: auth.user!.fullName || auth.user!.email,
+    })
+
+    return response.noContent()
+  }
 }

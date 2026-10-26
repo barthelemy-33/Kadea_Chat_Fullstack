@@ -130,13 +130,18 @@
           @each(item in items)
             <a
               href="/conversations/{{ item.id }}"
+              data-user-id="{{ item.otherId || '' }}"
               class="kc-row {{ item.id === activeId ? 'kc-row--active' : '' }}"
             >
-              @if(item.avatarUrl)
-                <img class="kc-avatar" src="{{ item.avatarUrl }}" alt="" />
-              @else
-                <span class="kc-avatar">{{ item.initials }}</span>
-              @end
+              <span class="kc-avatar-wrap">
+                @if(item.avatarUrl)
+                  <img class="kc-avatar" src="{{ item.avatarUrl }}" alt="" />
+                @else
+                  <span class="kc-avatar">{{ item.initials }}</span>
+                @end
+
+                <span class="kc-dot"></span>
+              </span>
 
               <div class="kc-row__body">
                 <div class="kc-row__top">
