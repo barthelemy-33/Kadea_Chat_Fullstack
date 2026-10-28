@@ -44,10 +44,13 @@
               Dashboard
             @end
           @else
-            @link({ route: 'session.create', class: 'lp-link' })
+            @link({ route: 'session.create', class: 'lp-link lp-hide-small' })
               Se connecter
             @end
-            @link({ route: 'new_account.create', class: 'lp-btn lp-btn--sm' })
+            @link({
+              route: 'new_account.create',
+              class: 'lp-btn lp-btn--sm lp-hide-small',
+            })
               S'inscrire
             @end
           @end
