@@ -175,7 +175,8 @@ Le fichier `.env.example` liste toutes les variables, sans valeurs secrètes.
 
 ## Base de données
 
-Le dictionnaire de données, le MCD et le MLD sont disponibles ici : **[schémas draw.io](COLLE-ICI-LE-LIEN-DRAW-IO)**
+Le dictionnaire de données, le MCD et le MLD sont disponibles ici :
+https://app.diagrams.net/#G1hitR1VSEhR9bL-SC2h2WWD7Znpluehbm#%7B%22pageId%22%3A%22JlURHSjAnfij32zXeUML%22%7D
 
 Tables principales : utilisateurs, conversations, membres des conversations, messages, et jetons de confirmation et de réinitialisation.
 
