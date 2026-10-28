@@ -44,6 +44,17 @@ export default class MessagesController {
 
     await conversation.notifyMembers(auth.user!.id)
 
+    // Envoi depuis la page (sans rechargement) : on répond en JSON
+    if (request.header('accept')?.includes('application/json')) {
+      return response.status(201).json({
+        id: message.id,
+        senderId: auth.user!.id,
+        content: message.content,
+        senderName: auth.user!.fullName || auth.user!.email,
+        time: message.createdAt.toFormat('HH:mm'),
+      })
+    }
+
     return response.redirect().toRoute('conversations.show', { id: conversation.id })
   }
   async destroy({ response, params, auth }: HttpContext) {

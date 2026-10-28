@@ -13,6 +13,7 @@ export default defineConfig({
         'resources/css/auth.css',
         'resources/css/messagerie.css',
         'resources/css/discussion.css',
+        'resources/css/home.css',
         'resources/js/app.js',
       ],
 

@@ -56,12 +56,23 @@ Alpine.data('themeToggle', function () {
 Alpine.data('chatRoom', function (channel, csrfToken, me, isGroup, initialReads) {
   return {
     reads: initialReads || {},
+    sending: false,
     async init() {
       // 1. Se placer sur le bon message (protégé : une erreur ici ne bloque rien)
       try {
         const input = document.querySelector('.kc-composer input[name="content"]')
         if (input) {
           input.addEventListener('input', () => this.notifyTyping())
+        }
+        const composer = document.querySelector('.kc-composer')
+        if (composer) {
+          composer.addEventListener('submit', (event) => this.send(event))
+
+          // Le bouton d'envoi ne doit pas faire perdre le focus au champ (clavier ouvert)
+          const sendButton = composer.querySelector('.kc-send')
+          if (sendButton) {
+            sendButton.addEventListener('mousedown', (event) => event.preventDefault())
+          }
         }
         const wanted = window.location.hash
           ? document.getElementById(window.location.hash.slice(1))
@@ -250,6 +261,11 @@ Alpine.data('chatRoom', function (channel, csrfToken, me, isGroup, initialReads)
     },
 
     addMessage(data) {
+      // Déjà affiché : la réponse d'envoi et l'événement temps réel arrivent tous les deux
+      if (document.getElementById('message-' + data.id)) {
+        return
+      }
+
       const box = this.$refs.scroller
       const nearBottom = box ? box.scrollHeight - box.scrollTop - box.clientHeight < 140 : true
       const mine = data.senderId === me
@@ -258,14 +274,32 @@ Alpine.data('chatRoom', function (channel, csrfToken, me, isGroup, initialReads)
         this.$refs.empty.remove()
       }
 
+      const row = mine ? this.buildOwnRow(data) : this.buildIncomingRow(data)
+      this.$refs.list.appendChild(row)
+
+      if (nearBottom || mine) {
+        this.scrollDown()
+      }
+
+      if (mine) {
+        this.updateTicks()
+        // Ma liste de conversations doit afficher mon nouveau dernier message
+        window.dispatchEvent(new CustomEvent('kc:refresh-list'))
+      } else {
+        this.markRead()
+        this.stopTyping()
+      }
+    },
+
+    buildIncomingRow(data) {
       const row = document.createElement('div')
       row.id = 'message-' + data.id
-      row.className = 'kc-msg ' + (mine ? 'kc-msg--out' : 'kc-msg--in')
+      row.className = 'kc-msg kc-msg--in'
 
       const bubble = document.createElement('div')
       bubble.className = 'kc-bubble'
 
-      if (isGroup && !mine) {
+      if (isGroup) {
         const author = document.createElement('div')
         author.className = 'kc-msg__author'
         author.textContent = data.senderName
@@ -280,88 +314,101 @@ Alpine.data('chatRoom', function (channel, csrfToken, me, isGroup, initialReads)
       const meta = document.createElement('div')
       meta.className = 'kc-msg__meta'
       meta.textContent = data.time
-      if (mine) {
-        const ticks = document.createElement('span')
-        ticks.className = 'kc-ticks'
-        ticks.setAttribute('data-ticks', '')
-        ticks.setAttribute('data-id', data.id)
-        ticks.textContent = '✓'
-        meta.append(' ', ticks)
-      }
 
       bubble.append(text, meta)
       row.append(bubble)
-      this.$refs.list.appendChild(row)
+      return row
+    },
 
-      if (nearBottom || mine) {
-        this.scrollDown()
+    buildOwnRow(data) {
+      const row = document.createElement('div')
+      row.id = 'message-' + data.id
+      row.className = 'kc-msg kc-msg--out'
+      row.setAttribute('x-data', '{ editing: false }')
+
+      // Même structure que celle que le serveur affiche pour mes messages
+      row.innerHTML = `
+    <div data-delete class="kc-tools">
+      <details class="kc-menu">
+        <summary aria-label="Options du message">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+        </summary>
+        <div class="kc-menu__panel">
+          <button type="button" x-on:click="editing = true; $el.closest('details').open = false">Modifier</button>
+          <form method="POST" action="/messages/${Number(data.id)}/delete">
+            <input type="hidden" name="_csrf" />
+            <button type="submit" class="kc-danger">Supprimer</button>
+          </form>
+        </div>
+      </details>
+    </div>
+    <div class="kc-bubble">
+      <p class="kc-msg__text" data-body x-show="!editing"></p>
+      <div class="kc-edit" x-show="editing" x-cloak>
+        <form method="POST" action="/messages/${Number(data.id)}/update">
+          <input type="hidden" name="_csrf" />
+          <input type="text" name="content" autocomplete="off" required maxlength="2000" />
+          <div class="kc-edit__actions">
+            <button type="button" x-on:click="editing = false">Annuler</button>
+            <button type="submit" class="kc-edit__ok">Enregistrer</button>
+          </div>
+        </form>
+      </div>
+      <div class="kc-msg__meta">
+        <span data-time></span>
+        <span class="kc-ticks" data-ticks data-id="${Number(data.id)}">✓</span>
+      </div>
+    </div>
+  `
+
+      // Les textes venant de l'utilisateur sont posés comme du texte, jamais comme du code
+      row.querySelector('[data-body]').textContent = data.content
+      row.querySelector('input[name="content"]').value = data.content
+      row.querySelector('[data-time]').textContent = data.time
+      for (const field of row.querySelectorAll('input[name="_csrf"]')) {
+        field.value = csrfToken
       }
-      if (!mine) {
-        this.markRead()
 
-        // L'autre vient d'envoyer : il n'écrit plus
-        const sub = document.querySelector('.kc-conv__sub')
-        if (sub) {
-          delete sub.dataset.typing
-          renderSubtitle()
+      return row
+    },
+
+    async send(event) {
+      event.preventDefault()
+
+      const form = event.target
+      const input = form.querySelector('input[name="content"]')
+      const content = input.value.trim()
+
+      if (!content || this.sending) {
+        return
+      }
+      this.sending = true
+
+      try {
+        const response = await fetch(form.action, {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrfToken,
+          },
+          body: JSON.stringify({ content }),
+        })
+
+        if (response.ok) {
+          input.value = ''
+          this.addMessage(await response.json())
+          input.focus()
+        } else {
+          // Envoi classique : la page affichera l'erreur du serveur
+          form.submit()
         }
+      } catch (error) {
+        form.submit()
+      } finally {
+        this.sending = false
       }
-    },
-
-    markDeleted(data) {
-      const block = document.getElementById('message-' + data.id)
-      if (!block) {
-        return
-      }
-
-      const body = block.querySelector('[data-body]')
-      const indication = document.createElement('em')
-      indication.className = 'kc-deleted'
-      indication.textContent = 'Ce message a été supprimé le ' + data.deletedAt
-      body.replaceChildren(indication)
-
-      const ticks = block.querySelector('[data-ticks]')
-      if (ticks) {
-        ticks.remove()
-      }
-
-      const tools = block.querySelector('[data-delete]')
-      if (tools) {
-        tools.remove()
-      }
-    },
-
-    markEdited(data) {
-      const block = document.getElementById('message-' + data.id)
-      if (!block) {
-        return
-      }
-
-      const body = block.querySelector('[data-body]')
-      body.textContent = data.content
-
-      if (!block.querySelector('[data-edited]')) {
-        const mention = document.createElement('small')
-        mention.setAttribute('data-edited', '')
-        mention.textContent = '(modifié)'
-        body.after(mention)
-      }
-    },
-
-    membersChanged(data) {
-      // Si c'est moi qui ai fait l'action, ma page se recharge déjà
-      if (data.by === me) {
-        return
-      }
-
-      // Si c'est moi qui suis retiré, je quitte la page
-      if (data.type === 'member_removed' && data.userId === me) {
-        window.location.href = '/dashboard'
-        return
-      }
-
-      // Sinon, la liste des membres a changé : on recharge
-      window.location.reload()
     },
   }
 })
@@ -369,8 +416,15 @@ Alpine.data('chatRoom', function (channel, csrfToken, me, isGroup, initialReads)
 Alpine.data('sidebarLive', function (userId, csrfToken) {
   return {
     online: [],
+    filter: 'all',
+    unreadCount: 0,
 
     async init() {
+      this.countUnread()
+
+      // Quand on envoie un message, la liste doit se mettre à jour
+      window.addEventListener('kc:refresh-list', () => this.refreshList())
+
       if (!userId) {
         return
       }
@@ -394,6 +448,18 @@ Alpine.data('sidebarLive', function (userId, csrfToken) {
       subscription.onMessage(() => {
         this.refreshList()
       })
+    },
+
+    setFilter(value) {
+      this.filter = value
+      const list = document.querySelector('.kc-list')
+      if (list) {
+        list.classList.toggle('kc-list--unread', value === 'unread')
+      }
+    },
+
+    countUnread() {
+      this.unreadCount = document.querySelectorAll('.kc-list .kc-row--has-unread').length
     },
 
     async beat() {
@@ -457,6 +523,7 @@ Alpine.data('sidebarLive', function (userId, csrfToken) {
           const row = current.querySelector('a[href="/conversations/' + match[1] + '"]')
           if (row) {
             row.classList.add('kc-row--active')
+            row.classList.remove('kc-row--has-unread')
 
             const badge = row.querySelector('.kc-unread')
             if (badge) {
@@ -473,7 +540,7 @@ Alpine.data('sidebarLive', function (userId, csrfToken) {
           }
         }
 
-        // La liste vient d'être remplacée : on remet les pastilles de présence
+        this.countUnread()
         this.applyPresence()
       } catch (error) {
         console.error('Kadea : impossible de rafraîchir la liste', error)

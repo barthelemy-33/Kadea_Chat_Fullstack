@@ -39,6 +39,36 @@
       class="kc-app kc-app--{{ mode }} {{ tab ? 'kc-app--tabs' : '' }}"
       x-data="sidebarLive({{ userId }}, '{{ csrfToken }}')"
     >
+      <nav class="kc-rail" aria-label="Menu">
+        <a
+          href="/dashboard"
+          class="kc-rail__btn {{ tab !== 'profile' ? 'kc-rail__btn--active' : '' }}"
+          title="Discussions"
+          aria-label="Discussions"
+        >
+          @svg('lucide:message-circle', { width: 22, height: 22 })
+        </a>
+        <div class="kc-rail__spacer"></div>
+        @!themeToggle()
+        <a
+          href="/profile"
+          class="kc-rail__btn {{ tab === 'profile' ? 'kc-rail__btn--active' : '' }}"
+          title="Mon profil"
+          aria-label="Mon profil"
+        >
+          @svg('lucide:user', { width: 22, height: 22 })
+        </a>
+        @form({ route: 'session.destroy', method: 'POST', class: 'kc-inline' })
+          <button
+            type="submit"
+            class="kc-rail__btn"
+            title="Se déconnecter"
+            aria-label="Se déconnecter"
+          >
+            @svg('lucide:log-out', { width: 22, height: 22 })
+          </button>
+        @end
+      </nav>
       <aside class="kc-sidebar">
         <header class="kc-sidebar__head">
           <a href="/dashboard" class="kc-brand">
@@ -72,16 +102,14 @@
             >
               @svg('lucide:users', { width: 19, height: 19 })
             </a>
-            <a
-              href="/profile"
-              class="kc-icon-btn kc-hide-mobile"
-              title="Mon profil"
-              aria-label="Mon profil"
-            >
-              @svg('lucide:user', { width: 19, height: 19 })
-            </a>
-            @!themeToggle()
-            @form({ route: 'session.destroy', method: 'POST', class: 'kc-inline' })
+            <span class="kc-only-mobile">
+              @!themeToggle()
+            </span>
+            @form({
+              route: 'session.destroy',
+              method: 'POST',
+              class: 'kc-inline kc-only-mobile',
+            })
               <button
                 type="submit"
                 class="kc-icon-btn"
@@ -102,6 +130,34 @@
             autocomplete="off"
           />
         @end
+
+        <div class="kc-filters">
+          <button
+            type="button"
+            class="kc-chip"
+            x-bind:class="{ 'kc-chip--active': filter === 'all' }"
+            x-on:click="setFilter('all')"
+          >
+            Toutes
+          </button>
+          <button
+            type="button"
+            class="kc-chip"
+            x-bind:class="{ 'kc-chip--active': filter === 'unread' }"
+            x-on:click="setFilter('unread')"
+          >
+            Non lues
+            <span
+              class="kc-chip__count"
+              x-show="unreadCount > 0"
+              x-text="unreadCount"
+              x-cloak
+            ></span>
+          </button>
+        </div>
+        <p class="kc-note" x-show="filter === 'unread' && unreadCount === 0" x-cloak>
+          Aucune conversation non lue.
+        </p>
 
         <nav class="kc-list">
           @if(q.length >= 2)
@@ -131,7 +187,7 @@
             <a
               href="/conversations/{{ item.id }}"
               data-user-id="{{ item.otherId || '' }}"
-              class="kc-row {{ item.id === activeId ? 'kc-row--active' : '' }}"
+              class="kc-row {{ item.id === activeId ? 'kc-row--active' : '' }} {{ item.unread > 0 ? 'kc-row--has-unread' : '' }}"
             >
               <span class="kc-avatar-wrap">
                 @if(item.avatarUrl)
