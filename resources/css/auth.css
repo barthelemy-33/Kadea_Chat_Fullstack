@@ -143,9 +143,7 @@
    ========================================================= */
 
 /* La colonne ne doit jamais s'élargir avec son contenu */
-.kc-app {
-  grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
-}
+
 .kc-sidebar,
 .kc-main {
   min-width: 0;
@@ -165,11 +163,6 @@
 }
 .kc-row__preview {
   max-width: 100%;
-}
-@media (max-width: 900px) {
-  .kc-app {
-    grid-template-columns: minmax(0, 1fr);
-  }
 }
 
 /* Menu d'actions d'un message : fenêtre en bas de l'écran */
@@ -392,45 +385,6 @@
 }
 .kc-sidebar__head {
   flex-wrap: nowrap;
-}
-
-/* Colonne d'icônes (ordinateur seulement) */
-.kc-rail {
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 14px 0;
-  background: var(--card);
-  border-right: 1px solid var(--line);
-}
-.kc-rail__spacer {
-  flex: 1;
-}
-.kc-rail__btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 46px;
-  height: 46px;
-  border-radius: 14px;
-  color: var(--ink-2);
-}
-.kc-rail__btn:hover {
-  background: var(--paper);
-}
-.kc-rail__btn--active,
-.kc-rail__btn--active:hover {
-  background: var(--brand-soft);
-  color: var(--brand);
-}
-@media (min-width: 901px) {
-  .kc-app {
-    grid-template-columns: 72px minmax(300px, 380px) minmax(0, 1fr);
-  }
-  .kc-rail {
-    display: flex;
-  }
 }
 
 /* Éléments réservés au téléphone */

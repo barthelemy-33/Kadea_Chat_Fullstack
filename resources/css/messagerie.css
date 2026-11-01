@@ -3,7 +3,7 @@
    ========================================================= */
 .kc-app {
   display: grid;
-  grid-template-columns: minmax(300px, 380px) 1.5fr;
+  grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
   height: 100vh;
   height: 100dvh;
   background: var(--paper);
@@ -426,4 +426,44 @@
   color: var(--btn-fg);
   font-size: 12px;
   font-weight: 700;
+}
+
+/* Colonne d'icônes (ordinateur seulement) */
+.kc-rail {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 0;
+  background: var(--card);
+  border-right: 1px solid var(--line);
+}
+.kc-rail__spacer {
+  flex: 1;
+}
+.kc-rail__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  color: var(--ink-2);
+}
+.kc-rail__btn:hover {
+  background: var(--paper);
+}
+.kc-rail__btn--active,
+.kc-rail__btn--active:hover {
+  background: var(--brand-soft);
+  color: var(--brand);
+}
+
+@media (min-width: 901px) {
+  .kc-app {
+    grid-template-columns: 72px minmax(300px, 380px) minmax(0, 1fr);
+  }
+  .kc-rail {
+    display: flex;
+  }
 }
