@@ -265,6 +265,18 @@ La présence en ligne repose sur un signal envoyé toutes les 25 secondes et ret
 
 ---
 
+---
+
+## Architecture
+
+L'architecture est décrite avec le modèle C4, en trois niveaux :
+
+1. **Contexte** : qui utilise Kadea Chat et avec quels services externes (Brevo, Cloudinary) il communique.
+2. **Conteneurs** : les grandes briques techniques (navigateur, application AdonisJS, base PostgreSQL).
+3. **Composants** : l'organisation interne de l'application (contrôleurs, modèles, validators, temps réel, emails, photos).
+
+Les schémas sont disponibles ici : https://app.diagrams.net/#G1vIbRfsvbmDbNGVsNLbmr-73fzgAs_ta8#%7B%22pageId%22%3A%22en-5o0OVk0D_OJu1yPvK%22%7D
+
 ## Déploiement
 
 L'application est déployée sur Render, depuis la branche `main`.
